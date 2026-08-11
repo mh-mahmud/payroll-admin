@@ -15,6 +15,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DynamicTableController;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\FrontController;
 use App\Http\Controllers\HomePageSettingController;
@@ -328,6 +329,14 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
 	Route::get('product-edit/{id?}', [ProductController::class, 'productEdit'])->name('product-edit')->middleware(['check-permission']);
 	Route::put('product-update-pro/{id}', [ProductController::class, 'productUpdate'])->name('product-update-pro');
 	// Product routes end
+
+	// Employee routes
+	Route::get('employee-list', [EmployeeController::class, 'index'])->name('employee-list')->middleware(['check-permission']);
+	Route::get('add-employee', [EmployeeController::class, 'create'])->name('add-employee')->middleware(['check-permission']);
+	Route::post('employee-store', [EmployeeController::class, 'store'])->name('employee-store');
+	Route::get('employee-edit/{employee}', [EmployeeController::class, 'edit'])->name('employee-edit')->middleware(['check-permission']);
+	Route::put('employee-update/{employee}', [EmployeeController::class, 'update'])->name('employee-update');
+	Route::delete('employee-delete/{employee}', [EmployeeController::class, 'destroy'])->name('employee-delete')->middleware(['check-permission']);
 
 	// Product color and size routes
 	Route::get('product-colors', [ProductAttributeController::class, 'colors'])->name('product-color-list');
