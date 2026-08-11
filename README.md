@@ -1,2 +1,2 @@
-# payroll-admin
-Basic html admin
+# febristudio
+This is Febri Studio Final project
