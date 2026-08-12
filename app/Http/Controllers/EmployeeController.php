@@ -1,63 +1,20 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\{DB,Hash};
 use Illuminate\Validation\Rule;
-
-class EmployeeController extends Controller
-{
-    public function __construct() { $this->middleware('auth'); }
-
-    public function index(Request $request)
-    {
-        $employees = Employee::query()
-            ->when($request->search, fn ($q, $search) => $q->where(fn ($q) => $q->where('name','like',"%{$search}%")->orWhere('email','like',"%{$search}%")->orWhere('employee_code','like',"%{$search}%")))
-            ->when($request->department, fn ($q, $value) => $q->where('department',$value))
-            ->when($request->designation, fn ($q, $value) => $q->where('designation',$value))
-            ->when($request->status, fn ($q, $value) => $q->where('employment_status',$value))
-            ->latest()->paginate(10)->withQueryString();
-
-        $departments = Employee::whereNotNull('department')->distinct()->orderBy('department')->pluck('department');
-        $designations = Employee::whereNotNull('designation')->distinct()->orderBy('designation')->pluck('designation');
-        $counts = ['All'=>Employee::count()];
-        foreach (['Active','Inactive','Probation','Terminated'] as $status) $counts[$status] = Employee::where('employment_status',$status)->count();
-        return view('employees.index', compact('employees','departments','designations','counts'));
-    }
-
-    public function create() { return view('employees.form', ['employee'=>new Employee(['employee_code'=>$this->nextCode()])]); }
-    public function edit(Employee $employee) { return view('employees.form', compact('employee')); }
-
-    public function store(Request $request)
-    {
-        Employee::create($this->validated($request));
-        return redirect()->route('employee-list')->with('success','Employee created successfully.');
-    }
-
-    public function update(Request $request, Employee $employee)
-    {
-        $employee->update($this->validated($request, $employee));
-        return redirect()->route('employee-list')->with('success','Employee updated successfully.');
-    }
-
-    public function destroy(Employee $employee)
-    {
-        $employee->delete();
-        return back()->with('success','Employee deleted successfully.');
-    }
-
-    private function nextCode(): string { return 'EMP'.str_pad((string)((int)Employee::max('id')+1),6,'0',STR_PAD_LEFT); }
-
-    private function validated(Request $request, ?Employee $employee=null): array
-    {
-        return $request->validate([
-            'employee_code'=>['required','max:50',Rule::unique('employees')->ignore($employee)],
-            'name'=>['required','max:191'], 'email'=>['required','email',Rule::unique('employees')->ignore($employee)],
-            'phone'=>['required','max:30'], 'branch'=>['required','max:191'], 'department'=>['required','max:191'],
-            'designation'=>['required','max:191'], 'date_of_joining'=>['required','date'],
-            'employment_status'=>['required',Rule::in(['Active','Inactive','Probation','Terminated'])],
-            'login_status'=>['required','boolean'],
-        ]);
-    }
+class EmployeeController extends Controller {
+ public function __construct(){$this->middleware('auth');}
+ public function index(Request $r){$employees=Employee::query()->when($r->search,fn($q,$s)=>$q->where(fn($q)=>$q->where('name','like',"%$s%")->orWhere('email','like',"%$s%")->orWhere('employee_code','like',"%$s%")))->when($r->branch_id,fn($q,$v)=>$q->where('branch_id',$v))->when($r->department_id,fn($q,$v)=>$q->where('department_id',$v))->when($r->designation_id,fn($q,$v)=>$q->where('designation_id',$v))->when($r->status,fn($q,$v)=>$q->where('employment_status',$v))->latest()->paginate(10)->withQueryString();$counts=['All'=>Employee::count()];foreach(['Active','Inactive','Probation','Terminated']as$s)$counts[$s]=Employee::where('employment_status',$s)->count();return view('employees.index',compact('employees','counts')+$this->lookups());}
+ public function create(){return view('employees.form',['employee'=>new Employee(['employee_code'=>$this->nextCode()])]+$this->lookups());}
+ public function edit(Employee $employee){$employee->load('documents.type');return view('employees.form',compact('employee')+$this->lookups());}
+ public function store(Request $r){DB::transaction(function()use($r){$e=Employee::create($this->prepare($r,$this->validated($r)));$this->documents($r,$e);});return redirect()->route('employee-list')->with('success','Employee created successfully.');}
+ public function update(Request $r,Employee $employee){DB::transaction(function()use($r,$employee){$employee->update($this->prepare($r,$this->validated($r,$employee),$employee));$this->documents($r,$employee);});return redirect()->route('employee-list')->with('success','Employee updated successfully.');}
+ public function destroy(Employee $employee){$employee->documents()->delete();$employee->delete();return back()->with('success','Employee deleted successfully.');}
+ private function lookups(){return['branches'=>DB::table('branches')->where('status',1)->select('id','branch_name as name')->get(),'departments'=>DB::table('departments')->where('status',1)->get(),'designations'=>DB::table('designations')->where('status',1)->get(),'shifts'=>DB::table('shifts')->where('status',1)->get(),'policies'=>DB::table('attendance_policies')->where('status',1)->get(),'documentTypes'=>DB::table('document_types')->where('status',1)->get()];}
+ private function nextCode(){return'EMP'.str_pad((string)((int)Employee::max('id')+1),7,'0',STR_PAD_LEFT);}
+ private function validated(Request$r,?Employee$e=null){return$r->validate(['employee_code'=>['required',Rule::unique('employees')->ignore($e)],'biometric_code'=>'required|max:50','name'=>'required|max:191','email'=>['required','email',Rule::unique('employees')->ignore($e)],'password'=>[$e?'nullable':'required','nullable','min:8'],'phone'=>'required|max:30','date_of_birth'=>'required|date','gender'=>'required|in:Male,Female,Other','profile_image'=>'nullable|image|max:2048','branch_id'=>'required|exists:branches,id','department_id'=>'required|exists:departments,id','designation_id'=>'required|exists:designations,id','shift_id'=>'nullable|exists:shifts,id','attendance_policy_id'=>'nullable|exists:attendance_policies,id','date_of_joining'=>'required|date','employment_type'=>'required','employment_status'=>'required','login_status'=>'required|boolean','address_line_1'=>'required','address_line_2'=>'nullable','city'=>'required','state'=>'required','country'=>'required','postal_code'=>'required','emergency_contact_name'=>'required','emergency_contact_relationship'=>'required','emergency_contact_phone'=>'required','bank_name'=>'required','account_holder_name'=>'required','account_number'=>'required','bank_identifier_code'=>'required','bank_branch'=>'required','tax_id'=>'nullable','base_salary'=>'required|numeric|min:0','document_type_id.*'=>'nullable|exists:document_types,id','document_file.*'=>'nullable|file|max:5120','document_expiry.*'=>'nullable|date']);}
+ private function prepare(Request$r,array$d,?Employee$e=null){unset($d['profile_image'],$d['document_type_id'],$d['document_file'],$d['document_expiry']);if(!empty($d['password']))$d['password']=Hash::make($d['password']);else unset($d['password']);if($r->hasFile('profile_image'))$d['profile_image']=$r->file('profile_image')->store('employees/profiles','public');elseif($e)$d['profile_image']=$e->profile_image;return$d;}
+ private function documents(Request$r,Employee$e){foreach($r->input('document_type_id',[])as$i=>$type){$file=$r->file("document_file.$i");if($type&&$file)$e->documents()->create(['document_type_id'=>$type,'file_path'=>$file->store('employees/documents','public'),'expiry_date'=>$r->input("document_expiry.$i")]);}}
 }

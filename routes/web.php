@@ -16,6 +16,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DynamicTableController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\FrontController;
 use App\Http\Controllers\HomePageSettingController;
@@ -337,6 +338,27 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
 	Route::get('employee-edit/{employee}', [EmployeeController::class, 'edit'])->name('employee-edit')->middleware(['check-permission']);
 	Route::put('employee-update/{employee}', [EmployeeController::class, 'update'])->name('employee-update');
 	Route::delete('employee-delete/{employee}', [EmployeeController::class, 'destroy'])->name('employee-delete')->middleware(['check-permission']);
+	Route::get('branches', [OrganizationController::class,'branches'])->name('branches')->middleware(['check-permission']);
+	Route::get('departments', [OrganizationController::class,'departments'])->name('departments')->middleware(['check-permission']);
+	Route::get('designations', [OrganizationController::class,'designations'])->name('designations')->middleware(['check-permission']);
+	Route::get('shifts', [OrganizationController::class,'shifts'])->name('shifts')->middleware(['check-permission']);
+	Route::get('attendance-policies', [OrganizationController::class,'attendancePolicies'])->name('attendance-policies')->middleware(['check-permission']);
+	Route::get('document-types', [OrganizationController::class,'documentTypes'])->name('document-types')->middleware(['check-permission']);
+	Route::get('holidays', [OrganizationController::class,'holidays'])->name('holidays')->middleware(['check-permission']);
+	Route::get('announcements', [OrganizationController::class,'announcements'])->name('announcements')->middleware(['check-permission']);
+	Route::get('award-types', [OrganizationController::class,'awardTypes'])->name('award-types')->middleware(['check-permission']);
+	Route::get('organization/{type}', [OrganizationController::class,'index'])->name('organization.index')->middleware(['check-permission']);
+	Route::get('organization/{type}/create', [OrganizationController::class,'create'])->name('organization.create')->middleware(['check-permission']);
+	Route::post('organization/{type}', [OrganizationController::class,'store'])->name('organization.store')->middleware(['check-permission']);
+	Route::get('organization/{type}/{id}/edit', [OrganizationController::class,'edit'])->name('organization.edit')->middleware(['check-permission']);
+	Route::put('organization/{type}/{id}', [OrganizationController::class,'update'])->name('organization.update')->middleware(['check-permission']);
+	Route::delete('organization/{type}/{id}', [OrganizationController::class,'destroy'])->name('organization.destroy')->middleware(['check-permission']);
+	Route::get('organization/{type}', [OrganizationController::class,'index'])->name('organization.index')->middleware(['check-permission']);
+	Route::get('organization/{type}/create', [OrganizationController::class,'create'])->name('organization.create')->middleware(['check-permission']);
+	Route::post('organization/{type}', [OrganizationController::class,'store'])->name('organization.store')->middleware(['check-permission']);
+	Route::get('organization/{type}/{id}/edit', [OrganizationController::class,'edit'])->name('organization.edit')->middleware(['check-permission']);
+	Route::put('organization/{type}/{id}', [OrganizationController::class,'update'])->name('organization.update')->middleware(['check-permission']);
+	Route::delete('organization/{type}/{id}', [OrganizationController::class,'destroy'])->name('organization.destroy')->middleware(['check-permission']);
 
 	// Product color and size routes
 	Route::get('product-colors', [ProductAttributeController::class, 'colors'])->name('product-color-list');

@@ -1,0 +1,12 @@
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+return new class extends Migration {
+ public function up(): void {
+  foreach(['branches','departments','designations','shifts','attendance_policies','document_types'] as $name){if(!Schema::hasTable($name))Schema::create($name,function(Blueprint $t)use($name){$t->id();$t->string('name');$t->string('code')->nullable();if($name==='departments')$t->unsignedBigInteger('branch_id')->nullable();if($name==='designations')$t->unsignedBigInteger('department_id')->nullable();if($name==='shifts'){$t->time('start_time')->nullable();$t->time('end_time')->nullable();}if($name==='attendance_policies'){$t->unsignedInteger('late_after_minutes')->default(0);$t->decimal('working_hours',4,2)->default(8);} $t->boolean('status')->default(1);$t->timestamps();});}
+  Schema::table('employees',function(Blueprint $t){$t->string('biometric_code')->nullable();$t->string('password')->nullable();$t->date('date_of_birth')->nullable();$t->string('gender',20)->nullable();$t->string('profile_image')->nullable();$t->unsignedBigInteger('branch_id')->nullable();$t->unsignedBigInteger('department_id')->nullable();$t->unsignedBigInteger('designation_id')->nullable();$t->unsignedBigInteger('shift_id')->nullable();$t->unsignedBigInteger('attendance_policy_id')->nullable();$t->string('employment_type')->default('Full-time');$t->string('address_line_1')->nullable();$t->string('address_line_2')->nullable();$t->string('city')->nullable();$t->string('state')->nullable();$t->string('country')->nullable();$t->string('postal_code')->nullable();$t->string('emergency_contact_name')->nullable();$t->string('emergency_contact_relationship')->nullable();$t->string('emergency_contact_phone')->nullable();$t->string('bank_name')->nullable();$t->string('account_holder_name')->nullable();$t->string('account_number')->nullable();$t->string('bank_identifier_code')->nullable();$t->string('bank_branch')->nullable();$t->string('tax_id')->nullable();$t->decimal('base_salary',14,2)->nullable();});
+  if(!Schema::hasTable('employee_documents'))Schema::create('employee_documents',function(Blueprint $t){$t->id();$t->unsignedBigInteger('employee_id')->index();$t->unsignedBigInteger('document_type_id')->nullable();$t->string('file_path');$t->date('expiry_date')->nullable();$t->timestamps();});
+ }
+ public function down():void{}
+};
