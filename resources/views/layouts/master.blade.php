@@ -116,6 +116,7 @@
 								</a>
 							</div>
 							@endif
+							{{-- Commented out dynamic CMS/marketing/agent links for HRM-only layout
 							@if($sidebarUser->user_type === 'admin')
 							<div class="menu-item">
 								<a class="menu-link {{ request()->routeIs('marketing-settings.*') ? 'active' : '' }}" href="{{ route('marketing-settings.edit') }}">
@@ -195,6 +196,7 @@
 								</a>
 							</div>
 							@endif
+							--}}
 
 
 
@@ -213,6 +215,13 @@
 							@if(!empty($links))
 
 							@foreach($links as $menu=>$submenu)
+								@php
+									$menuName = strtolower(str_replace(["_", " "], "", $menu));
+									$blacklist = ['customers', 'invoice', 'sliders', 'blog', 'brands', 'orders', 'menucategory', 'settings', 'proposal', 'leadsform', 'leadmanagement', 'campaign', 'emailmodule', 'smsmodule', 'tasks', 'products'];
+								@endphp
+								@if(in_array($menuName, $blacklist))
+									@continue
+								@endif
 							<div data-kt-menu-trigger="click" class="menu-item menu-accordion">
 								<span class="menu-link">
 									<span class="menu-icon">
@@ -258,6 +267,59 @@
 
 							@endif
 
+							<!-- Leave Management Menu -->
+							<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('leave-types*', 'leave-policies*', 'leave-applications*', 'leave-balances*') ? 'here show' : '' }}">
+								<span class="menu-link">
+									<span class="menu-icon">
+										<span class="svg-icon svg-icon-2">
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+												<line x1="16" y1="2" x2="16" y2="6"></line>
+												<line x1="8" y1="2" x2="8" y2="6"></line>
+												<line x1="3" y1="10" x2="21" y2="10"></line>
+											</svg>
+										</span>
+									</span>
+									<span class="menu-title">Leave Management</span>
+									<span class="menu-arrow"></span>
+								</span>
+								<div class="menu-sub menu-sub-accordion menu-active-bg">
+									<div class="menu-item">
+										<a class="menu-link {{ request()->routeIs('leave-applications*') ? 'active' : '' }}" href="{{ route('leave-applications') }}">
+											<span class="menu-bullet">
+												<span class="bullet bullet-dot"></span>
+											</span>
+											<span class="menu-title">Leave Applications</span>
+										</a>
+									</div>
+									<div class="menu-item">
+										<a class="menu-link {{ request()->routeIs('leave-balances*') ? 'active' : '' }}" href="{{ route('leave-balances') }}">
+											<span class="menu-bullet">
+												<span class="bullet bullet-dot"></span>
+											</span>
+											<span class="menu-title">Leave Balances</span>
+										</a>
+									</div>
+									<div class="menu-item">
+										<a class="menu-link {{ request()->routeIs('leave-types*') ? 'active' : '' }}" href="{{ route('leave-types') }}">
+											<span class="menu-bullet">
+												<span class="bullet bullet-dot"></span>
+											</span>
+											<span class="menu-title">Leave Types</span>
+										</a>
+									</div>
+									<div class="menu-item">
+										<a class="menu-link {{ request()->routeIs('leave-policies*') ? 'active' : '' }}" href="{{ route('leave-policies') }}">
+											<span class="menu-bullet">
+												<span class="bullet bullet-dot"></span>
+											</span>
+											<span class="menu-title">Leave Policies</span>
+										</a>
+									</div>
+								</div>
+							</div>
+
+							{{-- Commented out static CMS pages
 							@if($canSeeRoute('home-page-setting-edit'))
 							<div class="menu-item">
 								<a class="menu-link {{ request()->routeIs('home-page-setting-*') ? 'active' : '' }}" href="{{ route('home-page-setting-edit') }}">
@@ -340,6 +402,7 @@
 								</a>
 							</div>
 							@endif
+							--}}
 
 						</div>
 						<!--end::Menu-->

@@ -16,6 +16,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DynamicTableController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\LeaveTypeController;
+use App\Http\Controllers\LeavePolicyController;
+use App\Http\Controllers\LeaveApplicationController;
+use App\Http\Controllers\LeaveBalanceController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\FrontController;
@@ -338,6 +342,30 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
 	Route::get('employee-edit/{employee}', [EmployeeController::class, 'edit'])->name('employee-edit')->middleware(['check-permission']);
 	Route::put('employee-update/{employee}', [EmployeeController::class, 'update'])->name('employee-update');
 	Route::delete('employee-delete/{employee}', [EmployeeController::class, 'destroy'])->name('employee-delete')->middleware(['check-permission']);
+
+	// Leave Types routes
+	Route::get('leave-types', [LeaveTypeController::class, 'index'])->name('leave-types')->middleware(['check-permission']);
+	Route::post('leave-types-store', [LeaveTypeController::class, 'store'])->name('leave-types-store');
+	Route::get('leave-types-edit/{leaveType}', [LeaveTypeController::class, 'edit'])->name('leave-types-edit')->middleware(['check-permission']);
+	Route::put('leave-types-update/{leaveType}', [LeaveTypeController::class, 'update'])->name('leave-types-update');
+	Route::delete('leave-types-delete/{leaveType}', [LeaveTypeController::class, 'destroy'])->name('leave-types-delete')->middleware(['check-permission']);
+
+	// Leave Policies routes
+	Route::get('leave-policies', [LeavePolicyController::class, 'index'])->name('leave-policies')->middleware(['check-permission']);
+	Route::post('leave-policies-store', [LeavePolicyController::class, 'store'])->name('leave-policies-store');
+	Route::put('leave-policies-update/{leavePolicy}', [LeavePolicyController::class, 'update'])->name('leave-policies-update');
+	Route::delete('leave-policies-delete/{leavePolicy}', [LeavePolicyController::class, 'destroy'])->name('leave-policies-delete')->middleware(['check-permission']);
+
+	// Leave Applications routes
+	Route::get('leave-applications', [LeaveApplicationController::class, 'index'])->name('leave-applications')->middleware(['check-permission']);
+	Route::post('leave-applications-store', [LeaveApplicationController::class, 'store'])->name('leave-applications-store');
+	Route::post('leave-applications-approve/{leaveApplication}', [LeaveApplicationController::class, 'approve'])->name('leave-applications-approve');
+	Route::post('leave-applications-reject/{leaveApplication}', [LeaveApplicationController::class, 'reject'])->name('leave-applications-reject');
+	Route::delete('leave-applications-delete/{leaveApplication}', [LeaveApplicationController::class, 'destroy'])->name('leave-applications-delete')->middleware(['check-permission']);
+
+	// Leave Balances routes
+	Route::get('leave-balances', [LeaveBalanceController::class, 'index'])->name('leave-balances')->middleware(['check-permission']);
+	Route::post('leave-balances-sync', [LeaveBalanceController::class, 'sync'])->name('leave-balances-sync');
 	Route::get('branches', [OrganizationController::class,'branches'])->name('branches')->middleware(['check-permission']);
 	Route::get('departments', [OrganizationController::class,'departments'])->name('departments')->middleware(['check-permission']);
 	Route::get('designations', [OrganizationController::class,'designations'])->name('designations')->middleware(['check-permission']);
