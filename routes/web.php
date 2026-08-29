@@ -339,6 +339,11 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
 	Route::get('employee-list', [EmployeeController::class, 'index'])->name('employee-list')->middleware(['check-permission']);
 	Route::get('add-employee', [EmployeeController::class, 'create'])->name('add-employee')->middleware(['check-permission']);
 	Route::post('employee-store', [EmployeeController::class, 'store'])->name('employee-store');
+	Route::get('employees/{employee}/profile', [EmployeeController::class, 'profile'])->name('employee-profile');
+	Route::get('employees/{employee}', [EmployeeController::class, 'show'])->name('employee-show')->middleware(['check-permission']);
+	Route::patch('employees/{employee}/password', [EmployeeController::class, 'changePassword'])->name('employee-password');
+	Route::patch('employees/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employee-toggle-status');
+	Route::get('employee-documents/{document}/download', [EmployeeController::class, 'downloadDocument'])->name('employee-document-download');
 	Route::get('employee-edit/{employee}', [EmployeeController::class, 'edit'])->name('employee-edit')->middleware(['check-permission']);
 	Route::put('employee-update/{employee}', [EmployeeController::class, 'update'])->name('employee-update');
 	Route::delete('employee-delete/{employee}', [EmployeeController::class, 'destroy'])->name('employee-delete')->middleware(['check-permission']);

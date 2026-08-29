@@ -218,11 +218,17 @@
 								@php
 									$menuName = strtolower(str_replace(["_", " "], "", $menu));
 									$blacklist = ['customers', 'invoice', 'sliders', 'blog', 'brands', 'orders', 'menucategory', 'settings', 'proposal', 'leadsform', 'leadmanagement', 'campaign', 'emailmodule', 'smsmodule', 'tasks', 'products'];
+									$currentOrganizationType = request()->route('type');
+									$isOrganizationMenu = $menuName === 'organizationstructure';
+									$hasCurrentChild = collect((array) $submenu)->keys()->contains(function ($routeName) {
+										return !empty($routeName) && Route::has($routeName) && request()->routeIs($routeName);
+									});
+									$menuIsOpen = $hasCurrentChild || ($isOrganizationMenu && (request()->routeIs('organization.*') || request()->routeIs('branches', 'departments', 'designations', 'shifts', 'attendance-policies', 'document-types', 'holidays', 'announcements', 'award-types')));
 								@endphp
 								@if(in_array($menuName, $blacklist))
 									@continue
 								@endif
-							<div data-kt-menu-trigger="click" class="menu-item menu-accordion">
+							<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ $menuIsOpen ? 'here show' : '' }}">
 								<span class="menu-link">
 									<span class="menu-icon">
 										@if(!empty($icon)  && array_key_exists(str_replace("_", " ", $menu), $icon))
@@ -251,8 +257,12 @@
 
 
 									@endphp
+									@php
+										$normalizedChild = strtolower(str_replace(['_', ' '], '-', (string) $key));
+										$childIsActive = request()->routeIs($key) || ($isOrganizationMenu && request()->routeIs('organization.*') && $currentOrganizationType === $normalizedChild);
+									@endphp
 									<div class="menu-item">
-										<a class="menu-link" href="{{ route($key) }}">
+										<a class="menu-link {{ $childIsActive ? 'active' : '' }}" href="{{ route($key) }}">
 											<span class="menu-bullet">
 												<span class="bullet bullet-dot"></span>
 											</span>

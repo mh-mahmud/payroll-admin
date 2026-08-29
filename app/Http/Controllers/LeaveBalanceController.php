@@ -20,10 +20,7 @@ class LeaveBalanceController extends Controller
     {
         $year = $request->input('year', now()->year);
 
-        $query = Employee::where('employment_status', 'Active')
-            ->with(['leaveType' => function($q) use ($year) {
-                // Preload relationships if needed, or query LeaveBalance separately
-            }]);
+        $query = Employee::where('employment_status', 'Active');
 
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
@@ -65,7 +62,7 @@ class LeaveBalanceController extends Controller
                     $formattedBalances[$emp->id][] = $existing;
                 } else {
                     // Temporary instance to show on UI
-                    $formattedBalances[$emp->id][] = new LeaveBalance([
+                    $temporaryBalance = new LeaveBalance([
                         'employee_id' => $emp->id,
                         'leave_type_id' => $type->id,
                         'year' => $year,
@@ -73,6 +70,8 @@ class LeaveBalanceController extends Controller
                         'used_days' => 0,
                         'available_days' => $type->max_days,
                     ]);
+                    $temporaryBalance->setRelation('leaveType', $type);
+                    $formattedBalances[$emp->id][] = $temporaryBalance;
                 }
             }
         }
