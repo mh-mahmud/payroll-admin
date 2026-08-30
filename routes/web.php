@@ -378,7 +378,13 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
 	Route::get('attendance-policies', [OrganizationController::class,'attendancePolicies'])->name('attendance-policies')->middleware(['check-permission']);
 	Route::get('document-types', [OrganizationController::class,'documentTypes'])->name('document-types')->middleware(['check-permission']);
 	Route::get('holidays', [OrganizationController::class,'holidays'])->name('holidays')->middleware(['check-permission']);
+	Route::get('holiday-calendar', [OrganizationController::class,'holidayCalendar'])->name('holiday-calendar')->middleware(['check-permission']);
+	Route::get('holiday-export-pdf', [OrganizationController::class,'holidayPdf'])->name('holiday-export-pdf')->middleware(['check-permission']);
+	Route::get('holiday-export-ical', [OrganizationController::class,'holidayIcal'])->name('holiday-export-ical')->middleware(['check-permission']);
 	Route::get('announcements', [OrganizationController::class,'announcements'])->name('announcements')->middleware(['check-permission']);
+	Route::get('announcement-target-departments', [OrganizationController::class,'announcementTargetDepartments'])->name('announcement-target-departments')->defaults('permission_name','announcements')->middleware(['check-permission']);
+	Route::get('announcements/{id}/details', [OrganizationController::class,'announcementDetails'])->name('announcement-details')->middleware(['check-permission']);
+	Route::get('announcements/{id}/statistics', [OrganizationController::class,'announcementStatistics'])->name('announcement-statistics')->middleware(['check-permission']);
 	Route::get('award-types', [OrganizationController::class,'awardTypes'])->name('award-types')->middleware(['check-permission']);
 	Route::get('organization/{type}', [OrganizationController::class,'index'])->name('organization.index')->middleware(['check-permission']);
 	Route::get('organization/{type}/create', [OrganizationController::class,'create'])->name('organization.create')->middleware(['check-permission']);
@@ -386,6 +392,7 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
 	Route::get('organization/{type}/{id}/edit', [OrganizationController::class,'edit'])->name('organization.edit')->middleware(['check-permission']);
 	Route::put('organization/{type}/{id}', [OrganizationController::class,'update'])->name('organization.update')->middleware(['check-permission']);
 	Route::delete('organization/{type}/{id}', [OrganizationController::class,'destroy'])->name('organization.destroy')->middleware(['check-permission']);
+	Route::patch('organization/{type}/{id}/toggle-status', [OrganizationController::class,'toggleStatus'])->name('organization.toggle-status')->middleware(['check-permission']);
 	Route::get('organization/{type}', [OrganizationController::class,'index'])->name('organization.index')->middleware(['check-permission']);
 	Route::get('organization/{type}/create', [OrganizationController::class,'create'])->name('organization.create')->middleware(['check-permission']);
 	Route::post('organization/{type}', [OrganizationController::class,'store'])->name('organization.store')->middleware(['check-permission']);

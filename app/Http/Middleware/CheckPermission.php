@@ -34,7 +34,7 @@ class CheckPermission
             }
 
             // Check if the user is authenticated and has the required permission
-            $permission = request()->route()->getName();
+            $permission = request()->route('permission_name') ?: request()->route()->getName();
             if (!$user || !$user->hasPermission($permission)) {
                 // Optionally redirect or abort with a 403 Forbidden response
                 // return response()->json(['error' => 'Unauthorized'], 403);

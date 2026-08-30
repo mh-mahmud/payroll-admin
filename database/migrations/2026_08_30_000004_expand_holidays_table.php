@@ -1,0 +1,3 @@
+<?php
+use Illuminate\Database\Migrations\Migration;use Illuminate\Database\Schema\Blueprint;use Illuminate\Support\Facades\Schema;
+return new class extends Migration{public function up():void{Schema::table('holidays',function(Blueprint $t){$t->date('start_date')->nullable()->after('holiday_date');$t->date('end_date')->nullable()->after('start_date');$t->text('description')->nullable()->after('category');$t->json('branch_ids')->nullable()->after('branch_id');$t->boolean('is_recurring')->default(false);$t->boolean('is_paid')->default(false);});}public function down():void{Schema::table('holidays',fn(Blueprint $t)=>$t->dropColumn(['start_date','end_date','description','branch_ids','is_recurring','is_paid']));}};

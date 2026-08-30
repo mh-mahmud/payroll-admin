@@ -1,0 +1,9 @@
+@extends('layouts.master')
+@section('content')
+<link href="{{ asset('assets/plugins/custom/fullcalendar/fullcalendar.bundle.css') }}" rel="stylesheet">
+<style>.category-National{color:#1458e7;background:#edf3ff}.category-Religious{color:#8b00e9;background:#f8edff}.category-Company-specific{color:#00863d;background:#eafbf0}.category-Regional{color:#c45100;background:#fff4df}#holidayCalendar .fc-event{border-radius:4px;padding:2px 4px}.fc .fc-button-primary{background:#203246;border-color:#203246}</style>
+<div class="toolbar"><div class="container-fluid d-flex flex-stack"><h1 class="fs-3 fw-bolder">Holiday Calendar - {{ $year }}</h1><div class="d-flex gap-2"><a class="btn btn-sm btn-light" href="{{ route('organization.index',['type'=>'holidays','year'=>$year]) }}">☷ List View</a><a class="btn btn-sm btn-light" href="{{ route('holiday-export-pdf',['year'=>$year]) }}">▤ Export PDF</a><a class="btn btn-sm btn-light" href="{{ route('holiday-export-ical',['year'=>$year]) }}">⇩ Export iCal</a></div></div></div>
+<div class="container-fluid py-6"><div class="card"><div class="card-body"><div class="d-flex gap-3 mb-6"><span class="badge category-National">National</span><span class="badge category-Religious">Religious</span><span class="badge category-Company-specific">Company Specific</span><span class="badge category-Regional">Regional</span></div><div id="holidayCalendar"></div></div></div></div>
+<script src="{{ asset('assets/plugins/custom/fullcalendar/fullcalendar.bundle.js') }}"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){new FullCalendar.Calendar(document.getElementById('holidayCalendar'),{initialView:'dayGridMonth',initialDate:@json($initialDate),headerToolbar:{left:'prev,next today',center:'title',right:'dayGridMonth,timeGridWeek,timeGridDay'},events:@json($events)}).render()});</script>
+@endsection
