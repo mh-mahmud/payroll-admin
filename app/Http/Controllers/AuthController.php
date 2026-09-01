@@ -10,12 +10,16 @@ use Illuminate\Support\Facades\Session;
 use App\Models\User;
 use App\Models\Wishlist;
 use App\Models\Product;
+use App\Models\Employee;
 
 class AuthController extends Controller
 {
 
     public function index()
     {
+        if (Auth::guard('employee')->check()) {
+            return redirect()->route('dashboard');
+        }
         if (Auth::check()) {
             return in_array(Auth::user()->user_type, ['admin', 'agent'], true)
                 ? redirect()->route('dashboard')
@@ -99,26 +103,43 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        // The back-office login is exclusively for active admins and agents.
+        // Try an active admin or agent account first.
         $user = User::query()
             ->where('email', $request->email)
             ->where('status', 1)
             ->whereIn('user_type', ['admin', 'agent'])
             ->first();
 
-        if (empty($user)) {
-            return redirect()->route('login')->withInput($request->only('email'))
-                ->with('error', 'Only active Admin or Agent accounts can log in here.');
-        }
-
-        if (Hash::check($request->password, $user->password)) {
+        if ($user && Hash::check($request->password, $user->password)) {
             Auth::login($user, $request->boolean('remember'));
             session()->regenerate();
             session()->put('users', Auth::user());
             return redirect()->intended('dashboard')->with('success', 'You have successfully logged in.');
         }
 
-        return redirect()->route('login')->withInput($request->only('email'))->with('error', 'Invalid password.');
+        $employee = Employee::query()
+            ->where('email', $request->email)
+            ->where('login_status', 1)
+            ->whereNotNull('password')
+            ->first();
+
+        if ($employee && Hash::check($request->password, $employee->password)) {
+            Auth::guard('employee')->login($employee, $request->boolean('remember'));
+            $request->session()->regenerate();
+            $request->session()->put('employee_id', $employee->id);
+            return redirect()->route('dashboard')
+                ->with('success', 'You have successfully logged in.');
+        }
+
+        return redirect()->route('login')->withInput($request->only('email'))->with('error', 'Invalid email or password, or the account is inactive.');
+    }
+
+    public function employeeLogout(Request $request)
+    {
+        Auth::guard('employee')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('login')->with('success', 'You have successfully logged out.');
     }
 
     public function logout(Request $request)

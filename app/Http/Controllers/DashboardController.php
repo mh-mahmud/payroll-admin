@@ -23,10 +23,15 @@ class DashboardController extends Controller {
 
 	public function dashboard()
     {
+        $dashboardUser = Auth::user() ?: Auth::guard('employee')->user();
+        if (!$dashboardUser) {
+            return redirect()->route('login');
+        }
+
         $orderQuery = Order::query();
 
-        if (Auth::user()->user_type === 'agent') {
-            $agentId = Agent::where('user_id', Auth::id())->value('agent_id');
+        if ($dashboardUser->user_type === 'agent') {
+            $agentId = Agent::where('user_id', $dashboardUser->id)->value('agent_id');
             $orderQuery->where('assigned_agent_id', $agentId ?: '__no_agent__');
         }
 
@@ -129,8 +134,8 @@ class DashboardController extends Controller {
             ->limit(7)
             ->get();
 
-        $currentAgentId = Auth::user()->user_type === 'agent'
-            ? Agent::where('user_id', Auth::id())->value('agent_id')
+        $currentAgentId = $dashboardUser->user_type === 'agent'
+            ? Agent::where('user_id', $dashboardUser->id)->value('agent_id')
             : null;
 
         $metrics = [
@@ -212,6 +217,7 @@ class DashboardController extends Controller {
             'todaySalesTotal',
             'newOrderList',
             'currentAgentId'
+            ,'dashboardUser'
         ));
     }
 

@@ -136,7 +136,7 @@
         <section class="dash-card todo">
             <header class="card-heading">
                 <div><span class="eyebrow">TEAM</span><h2>Agent List</h2></div>
-                @if(Auth::user()->user_type === 'admin')
+                @if($dashboardUser->user_type === 'admin')
                     <a href="{{ route('agents-index') }}">View all&nbsp; →</a>
                 @endif
             </header>
@@ -208,7 +208,7 @@
                     @endphp
                     <article class="new-order-dashboard-row">
                         <div>
-                            <a href="{{ Auth::user()->user_type === 'admin' || (string) $newOrder->assigned_agent_id === (string) $currentAgentId ? route('orders-show', $newOrder->id) : '#' }}">
+                            <a href="{{ $dashboardUser->user_type === 'admin' || (string) $newOrder->assigned_agent_id === (string) $currentAgentId ? route('orders-show', $newOrder->id) : '#' }}">
                                 {{ $newOrder->custom_order_id ?: '#'.$newOrder->id }}
                             </a>
                             <span>{{ $newOrderCustomer }} · {{ optional($newOrder->created_at)->format('d M, h:i A') }}</span>
@@ -220,7 +220,7 @@
                                     {{ (string) $newOrder->assigned_agent_id === (string) $currentAgentId ? 'Assigned to you' : 'Already assigned by' }}
                                     <b>{{ $assignedAgentName }}</b>
                                 </span>
-                            @elseif(Auth::user()->user_type === 'agent' && $currentAgentId)
+                            @elseif($dashboardUser->user_type === 'agent' && $currentAgentId)
                                 <form action="{{ route('orders-claim') }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="order_ids[]" value="{{ $newOrder->id }}">

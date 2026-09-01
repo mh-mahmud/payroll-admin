@@ -4,7 +4,7 @@
         <meta charset="utf-8"/>
         <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <title>Admin & Agent Login</title>
+        <title>Admin, Agent & Employee Login</title>
         <link type="image/x-icon" rel="shortcut icon" href="{{url('/')}}/assets/media/logos/fox-technologies.jpg"/>
         <!-- <link rel="preload" href="/web/static/src/libs/fontawesome/fonts/fontawesome-webfont.woff2?v=4.7.0" as="font" crossorigin=""/> -->
         <!-- <link type="text/css" rel="stylesheet" href="web.assets_frontend.min.css"/> -->
@@ -60,8 +60,8 @@
                             <div class="card-body">
                                 <div class="text-center pb-3 border-bottom mb-4">
                                     <img alt="Logo" style="max-height:120px; max-width: 40%; width:auto" src="{{url('/')}}/assets/media/logos/fox-technologies.jpg"/>
-                                    <h5 class="mt-3 mb-0">Admin & Agent Login</h5>
-                                    <small class="text-muted">Back-office access only</small>
+                                    <h5 class="mt-3 mb-0">Admin, Agent & Employee Login</h5>
+                                    <small class="text-muted">Sign in with your work email and password</small>
                                 </div>
                                 
                                 <form class="oe_login_form" role="form" method="post" action="{{ route('login.post') }}">

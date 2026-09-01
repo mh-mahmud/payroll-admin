@@ -76,7 +76,7 @@
 						<!--begin::Menu-->
 						<div class="menu menu-column menu-title-gray-800 menu-state-title-primary menu-state-icon-primary menu-state-bullet-primary menu-arrow-gray-500" id="#kt_aside_menu" data-kt-menu="true">
 							@php
-								$sidebarUser = Auth::user();
+								$sidebarUser = Auth::user() ?: Auth::guard('employee')->user();
 								$canSeeRoute = fn (string $routeName) =>
 									$sidebarUser->user_type === 'admin' || $sidebarUser->hasPermission($routeName);
 							@endphp
@@ -164,7 +164,7 @@
 								</a>
 							</div>
 							@endif
-							@if(Auth::user()->user_type === 'admin')
+							@if($sidebarUser->user_type === 'admin')
 							<div class="menu-item">
 								<a class="menu-link {{ request()->routeIs('courier-integrations.*') ? 'active' : '' }}" href="{{ route('courier-integrations.index') }}">
 									<span class="menu-icon"><span class="svg-icon svg-icon-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path opacity=".3" d="M3 6h12v11H3V6Z" fill="black"/><path d="M15 9h3l3 4v4h-6V9ZM7 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm10 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="black"/></svg></span></span>
@@ -207,7 +207,7 @@
 							</div>
 
 							@php
-							$links = Auth::user()->get_menu_data();
+							$links = $sidebarUser->get_menu_data();
 							$links = json_decode($links);
 							$icon = config('constants.svg_icons');
 							@endphp
@@ -480,7 +480,7 @@
 										</div>
 
 										<!-- settings -->
-										@if(Auth::user()->user_type=='admin')
+										@if($sidebarUser->user_type=='admin')
 										<div data-kt-menu-trigger="click" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-lg-1">
 											<span class="menu-link py-3">
 												<span class="menu-title">Settings <span class="menu-arrow"></span></span>
@@ -785,7 +785,7 @@
 											<!--end::Menu item-->
 											<!--begin::Menu item-->
 											<div class="menu-item px-5">
-												<form id="logout-form" action="{{ route('logout') }}" method="POST">
+											<form id="logout-form" action="{{ Auth::guard('employee')->check() ? route('employee.logout') : route('logout') }}" method="POST">
 													@csrf
 													<button type="submit" class="menu-link px-5" style="background:none;border:none;">Sign Out</button>
 												</form>

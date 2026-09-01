@@ -124,6 +124,7 @@ Route::get('user-login', [AuthController::class, 'user_login'])->name('user-logi
 Route::get('user-register', [AuthController::class, 'user_register'])->name('user-register');
 
 Route::post('post_login', [AuthController::class, 'postLogin'])->middleware('throttle:10,1')->name('login.post');
+Route::post('employee-logout', [AuthController::class, 'employeeLogout'])->middleware('auth:employee')->name('employee.logout');
 Route::post('post_user_login', [AuthController::class, 'postUserLogin'])->name('user.login.post');
 Route::post('post_user_register', [AuthController::class, 'postUserRegister'])->name('user.register.post');
 
@@ -202,7 +203,7 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
 
 
 	Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->withoutMiddleware('check-permission');
-	Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard')->withoutMiddleware('check-permission');
+	Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard')->withoutMiddleware(['auth', 'check-permission']);
 	Route::get('/profile', [DashboardController::class, 'profile'])->name('profile')->withoutMiddleware('check-permission');
 
 	// agents route
