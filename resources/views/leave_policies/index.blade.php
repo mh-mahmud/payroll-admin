@@ -79,8 +79,11 @@
                 <!-- Status Filter hidden, managed by tab click -->
                 <input type="hidden" name="status" id="status_filter_val" value="{{ request('status', 'All') }}">
 
-                <!-- Filter Button -->
-                <button type="submit" class="btn btn-secondary btn-sm fw-bold">Filters</button>
+                <!-- Filter Buttons -->
+                <button type="submit" class="btn btn-secondary btn-sm fw-bold"><i class="bi bi-funnel me-1"></i>Filters</button>
+                @if(request()->hasAny(['search', 'leave_type_id']) || (request('status') && request('status') !== 'All'))
+                    <a href="{{ route('leave-policies') }}" class="btn btn-light-danger btn-sm fw-bold">Clear</a>
+                @endif
             </form>
 
             <!-- Status Tabs -->
@@ -89,7 +92,7 @@
                     <a class="pb-3 fw-bold fs-7 {{ request('status', 'All') === $statusKey ? 'text-success border-bottom border-success border-3' : 'text-muted' }}" 
                        href="javascript:void(0)" 
                        onclick="filterByStatus('{{ $statusKey }}')">
-                        {{ $statusKey }} <span class="badge badge-light-success ms-1">{{ $count }}</span>
+                        <i class="bi {{ $statusKey === 'All' ? 'bi-grid' : ($statusKey === 'Active' ? 'bi-check-circle' : 'bi-x-circle') }} me-1"></i>{{ $statusKey }} <span class="badge badge-light-success ms-1">{{ $count }}</span>
                     </a>
                 @endforeach
             </div>
@@ -98,17 +101,17 @@
         <!-- Table Body -->
         <div class="card-body pt-0">
             <div class="table-responsive">
-                <table class="table align-middle table-row-dashed fs-6 gy-5">
+                <table class="table align-middle table-row-dashed fs-6 gy-5 w-100">
                     <thead>
                         <tr class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0">
                             <th class="w-50px">#</th>
-                            <th class="min-w-150px">Policy Name</th>
-                            <th class="min-w-125px">Leave Type</th>
-                            <th class="min-w-100px">Carry Forward</th>
-                            <th class="min-w-100px">Approval</th>
-                            <th class="min-w-100px">Status</th>
-                            <th class="min-w-125px">Created At</th>
-                            <th class="text-end min-w-100px">Actions</th>
+                            <th class="min-w-200px w-25">Policy Name</th>
+                            <th class="min-w-150px w-20">Leave Type</th>
+                            <th class="min-w-120px w-15">Carry Forward</th>
+                            <th class="min-w-120px w-12">Approval</th>
+                            <th class="min-w-100px w-10">Status</th>
+                            <th class="min-w-140px w-15">Created At</th>
+                            <th class="text-end min-w-120px">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="fw-semibold text-gray-600">
@@ -118,9 +121,6 @@
                                 <td>
                                     <div class="d-flex flex-column">
                                         <span class="text-gray-800 fw-bold fs-6">{{ $policy->name }}</span>
-                                        @if($policy->description)
-                                            <span class="text-muted fs-7">{{ \Illuminate\Support\Str::limit($policy->description, 60) }}</span>
-                                        @endif
                                     </div>
                                 </td>
                                 <td>
@@ -140,13 +140,26 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="badge badge-light-success fs-8">{{ $policy->status }}</span>
+                                    <span class="badge badge-light-{{ $policy->status === 'Active' ? 'success' : 'danger' }} fs-8">{{ $policy->status }}</span>
                                 </td>
                                 <td>
-                                    {{ $policy->created_at?->format('Y-m-d') }}
+                                    <span class="d-inline-flex align-items-center gap-2"><i class="bi bi-calendar3 text-muted"></i>{{ $policy->created_at?->format('Y-m-d') }}</span>
                                 </td>
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end gap-2">
+                                        <button type="button" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm view-policy-btn"
+                                            data-name="{{ $policy->name }}"
+                                            data-description="{{ $policy->description }}"
+                                            data-leave-type="{{ $policy->leaveType?->name ?? 'N/A' }}"
+                                            data-carry-forward="{{ $policy->carry_forward_limit }}"
+                                            data-min-days="{{ $policy->min_days }}"
+                                            data-max-days="{{ $policy->max_days }}"
+                                            data-approval="{{ $policy->requires_approval ? 'Required' : 'Not Required' }}"
+                                            data-status="{{ $policy->status }}"
+                                            data-created="{{ $policy->created_at?->format('Y-m-d') }}"
+                                            data-bs-toggle="modal" data-bs-target="#view_policy_modal" title="View">
+                                            <i class="bi bi-eye fs-4"></i>
+                                        </button>
                                         <!-- Edit button -->
                                         <button type="button" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm edit-policy-btn" 
                                             data-id="{{ $policy->id }}"
@@ -162,8 +175,16 @@
                                             <i class="bi bi-pencil fs-4"></i>
                                         </button>
 
+                                        <form action="{{ route('leave-policies-toggle-status', $policy) }}" method="POST" class="d-inline policy-confirm" data-message="{{ $policy->status === 'Active' ? 'Deactivate' : 'Activate' }} this leave policy?">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="btn btn-icon btn-bg-light btn-active-color-warning btn-sm" title="Change status">
+                                                <i class="bi bi-lock fs-4"></i>
+                                            </button>
+                                        </form>
+
                                         <!-- Delete -->
-                                        <form action="{{ route('leave-policies-delete', $policy) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this leave policy?')">
+                                        <form action="{{ route('leave-policies-delete', $policy) }}" method="POST" class="d-inline policy-confirm" data-message="Delete this leave policy permanently?">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-icon btn-bg-light btn-active-color-danger btn-sm" title="Delete">
@@ -182,11 +203,81 @@
                 </table>
             </div>
             
-            @if($leavePolicies->hasPages())
-                <div class="mt-4">
-                    {{ $leavePolicies->links() }}
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 p-5 border-top">
+                <span class="text-muted">Showing {{ $leavePolicies->firstItem() ?? 0 }} to {{ $leavePolicies->lastItem() ?? 0 }} of {{ $leavePolicies->total() }} results</span>
+                <div>{{ $leavePolicies->links() }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #leave_policy_modal .modal-dialog { max-width: 520px; }
+    #leave_policy_modal .modal-content, #view_policy_modal .modal-content { border: 0; border-radius: 12px; box-shadow: 0 12px 35px rgba(15,23,42,.22); }
+    #leave_policy_modal .modal-header, #view_policy_modal .modal-header { padding: 22px 25px; border-bottom: 1px solid #e5e7eb; }
+    #leave_policy_modal .modal-body { max-height: 70vh; overflow-y: auto; padding: 20px 25px !important; }
+    #leave_policy_modal .modal-footer { justify-content: flex-end !important; padding: 14px 25px; }
+    #leave_policy_modal .form-control, #leave_policy_modal .form-select { min-height: 42px; border: 1px solid #d9dee7; background: #fff; }
+    #leave_policy_modal .policy-status-field { display: none; }
+    #leave_policy_modal .policy-invalid { border-color: #f1414d !important; box-shadow: none !important; }
+    #leave_policy_modal .policy-error { color: #f1414d; font-size: 12px; margin-top: 7px; }
+    #view_policy_modal .policy-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 45px; padding: 25px; }
+    #view_policy_modal .policy-detail-label { color: #6f7a90; margin-bottom: 5px; }
+    #view_policy_modal .policy-detail-value { color: #111827; font-weight: 500; }
+    #view_policy_modal .policy-detail-full { grid-column: 1/-1; }
+    @media(max-width:575px){#view_policy_modal .policy-detail-grid{grid-template-columns:1fr}#view_policy_modal .policy-detail-full{grid-column:auto}}
+</style>
+
+<div class="modal fade" id="view_policy_modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="w-40px h-40px rounded d-grid place-items-center bg-light-success text-success">
+                        <i class="bi bi-calendar-check fs-3"></i>
+                    </span>
+                    <h2 class="fw-bold mb-0">Leave Policy Details</h2>
                 </div>
-            @endif
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="policy-detail-grid">
+                <div>
+                    <div class="policy-detail-label">Policy Name</div>
+                    <div class="policy-detail-value" data-policy-view="name">—</div>
+                </div>
+                <div>
+                    <div class="policy-detail-label">Leave Type</div>
+                    <div class="policy-detail-value" data-policy-view="leave-type">—</div>
+                </div>
+                <div>
+                    <div class="policy-detail-label">Carry Forward</div>
+                    <div class="policy-detail-value" data-policy-view="carry-forward">—</div>
+                </div>
+                <div>
+                    <div class="policy-detail-label">Approval</div>
+                    <div data-policy-view="approval">—</div>
+                </div>
+                <div>
+                    <div class="policy-detail-label">Min Days Per Application</div>
+                    <div class="policy-detail-value" data-policy-view="min-days">—</div>
+                </div>
+                <div>
+                    <div class="policy-detail-label">Max Days Per Application</div>
+                    <div class="policy-detail-value" data-policy-view="max-days">—</div>
+                </div>
+                <div>
+                    <div class="policy-detail-label">Status</div>
+                    <div data-policy-view="status">—</div>
+                </div>
+                <div>
+                    <div class="policy-detail-label">Created At</div>
+                    <div class="policy-detail-value" data-policy-view="created">—</div>
+                </div>
+                <div class="policy-detail-full">
+                    <div class="policy-detail-label">Description</div>
+                    <div class="policy-detail-value" data-policy-view="description">—</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -201,7 +292,7 @@
                     <i class="bi bi-x fs-1"></i>
                 </div>
             </div>
-            <form id="leave_policy_form" method="POST" action="{{ route('leave-policies-store') }}">
+            <form id="leave_policy_form" method="POST" action="{{ route('leave-policies-store') }}" novalidate>
                 @csrf
                 <input type="hidden" name="_method" id="form_method" value="POST">
 
@@ -258,7 +349,7 @@
                     </div>
 
                     <!-- Status -->
-                    <div class="mb-5 fv-row">
+                    <div class="mb-5 fv-row policy-status-field">
                         <label class="required fs-6 fw-bold mb-2">Status</label>
                         <select name="status" id="policy_status_input" class="form-select form-select-solid" required>
                             <option value="Active">Active</option>
@@ -323,5 +414,82 @@
             });
         });
     });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var form = document.getElementById('leave_policy_form');
+    if (!form) return;
+    form.noValidate = true;
+    form.querySelectorAll('[required]').forEach(function (field) { field.removeAttribute('required'); });
+
+    var rules = {
+        name: function (field) {
+            var value = field.value.trim();
+            if (!value) return 'Policy Name is required';
+            if (value.length < 2) return 'Policy Name must be at least 2 characters';
+            return value.length > 191 ? 'Policy Name may not be greater than 191 characters' : '';
+        },
+        leave_type_id: function (field) { return field.value ? '' : 'Leave Type is required'; },
+        carry_forward_limit: function (field) {
+            if (field.value === '') return 'Carry Forward Limit (Days) is required';
+            return /^\d+$/.test(field.value) ? '' : 'Carry Forward Limit must be a positive whole number';
+        },
+        min_days: function (field) {
+            if (field.value === '') return 'Min Days Per Application is required';
+            return /^\d+$/.test(field.value) && Number(field.value) >= 1 ? '' : 'Min Days must be at least 1';
+        },
+        max_days: function (field) {
+            if (field.value === '') return 'Max Days Per Application is required';
+            if (!/^\d+$/.test(field.value) || Number(field.value) < 1) return 'Max Days must be at least 1';
+            return Number(field.value) < Number(form.elements.min_days.value || 0) ? 'Max Days must be greater than or equal to Min Days' : '';
+        }
+    };
+
+    function errorBox(field) {
+        var box = field.parentElement.querySelector('.policy-error[data-for="' + field.name + '"]');
+        if (!box) { box = document.createElement('div'); box.className = 'policy-error'; box.dataset.for = field.name; field.insertAdjacentElement('afterend', box); }
+        return box;
+    }
+    function validateField(field) {
+        var message = rules[field.name] ? rules[field.name](field) : '', box = errorBox(field);
+        field.classList.toggle('policy-invalid', Boolean(message));
+        field.setAttribute('aria-invalid', message ? 'true' : 'false');
+        box.textContent = message; box.style.display = message ? 'block' : 'none';
+        return !message;
+    }
+    function clearPolicyErrors() {
+        form.querySelectorAll('.policy-invalid').forEach(function (field) { field.classList.remove('policy-invalid'); field.removeAttribute('aria-invalid'); });
+        form.querySelectorAll('.policy-error').forEach(function (box) { box.remove(); });
+    }
+    Object.keys(rules).forEach(function (name) {
+        var field = form.elements[name];
+        field.addEventListener(field.tagName === 'SELECT' ? 'change' : 'input', function () { validateField(field); if (name === 'min_days' && form.elements.max_days.value) validateField(form.elements.max_days); });
+        field.addEventListener('blur', function () { validateField(field); });
+    });
+    form.addEventListener('submit', function (event) {
+        var firstInvalid = null;
+        Object.keys(rules).forEach(function (name) { var field = form.elements[name]; if (!validateField(field) && !firstInvalid) firstInvalid = field; });
+        if (firstInvalid) { event.preventDefault(); firstInvalid.focus(); firstInvalid.scrollIntoView({behavior:'smooth',block:'center'}); }
+    });
+    document.getElementById('add_policy_btn').addEventListener('click', clearPolicyErrors);
+    document.querySelectorAll('.edit-policy-btn').forEach(function (button) { button.addEventListener('click', clearPolicyErrors); });
+
+    document.querySelectorAll('.view-policy-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var modal = document.getElementById('view_policy_modal');
+            ['name','description','leave-type','min-days','max-days','created'].forEach(function (key) { modal.querySelector('[data-policy-view="'+key+'"]').textContent = button.dataset[key] || '—'; });
+            modal.querySelector('[data-policy-view="carry-forward"]').textContent = (button.dataset.carryForward || '0') + ' days';
+            var approval = modal.querySelector('[data-policy-view="approval"]'); approval.innerHTML = '<span class="badge badge-light-'+(button.dataset.approval === 'Required'?'warning':'success')+'"></span>'; approval.firstChild.textContent = button.dataset.approval;
+            var status = modal.querySelector('[data-policy-view="status"]'); status.innerHTML = '<span class="badge badge-light-'+(button.dataset.status === 'Active'?'success':'danger')+'"></span>'; status.firstChild.textContent = button.dataset.status;
+        });
+    });
+    document.querySelectorAll('.policy-confirm').forEach(function (confirmForm) {
+        confirmForm.addEventListener('submit', function (event) {
+            if (confirmForm.dataset.confirmed) return;
+            event.preventDefault();
+            Swal.fire({title:confirmForm.dataset.message,icon:'warning',showCancelButton:true,confirmButtonColor:'#00b783'}).then(function(result){if(result.isConfirmed){confirmForm.dataset.confirmed='1';confirmForm.submit();}});
+        });
+    });
+});
 </script>
 @endsection

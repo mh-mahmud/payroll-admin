@@ -165,6 +165,11 @@
                                         <!-- View reason/attachment details -->
                                         <button type="button" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm view-app-btn" 
                                             data-name="{{ $app->employee?->name }}"
+                                            data-leave-type="{{ $app->leaveType?->name ?? 'N/A' }}"
+                                            data-start-date="{{ $app->start_date?->format('Y-m-d') }}"
+                                            data-end-date="{{ $app->end_date?->format('Y-m-d') }}"
+                                            data-total-days="{{ $app->days_count }}"
+                                            data-status="{{ $app->status }}"
                                             data-reason="{{ $app->reason }}"
                                             data-attachment="{{ $app->attachment_path ? asset('storage/' . $app->attachment_path) : '' }}"
                                             data-bs-toggle="modal" data-bs-target="#view_application_modal" title="View details">
@@ -230,7 +235,7 @@
                     <i class="bi bi-x fs-1"></i>
                 </div>
             </div>
-            <form method="POST" action="{{ route('leave-applications-store') }}" enctype="multipart/form-data">
+            <form id="leaveApplicationForm" method="POST" action="{{ route('leave-applications-store') }}" enctype="multipart/form-data" novalidate>
                 @csrf
                 <div class="modal-body py-10 px-lg-17">
                     <!-- Employee -->
@@ -289,34 +294,130 @@
     </div>
 </div>
 
+<style>
+    #leave_application_modal .modal-content { border: 0; border-radius: 12px; }
+    #leave_application_modal .modal-header { padding: 22px 25px; border-bottom: 1px solid #e5e7eb; }
+    #leave_application_modal .modal-body { padding: 20px 25px !important; max-height: 70vh; overflow-y: auto; }
+    #leave_application_modal .modal-footer { padding: 15px 25px; border-top: 1px solid #e5e7eb; justify-content: flex-end !important; }
+    #leave_application_modal .form-control,
+    #leave_application_modal .form-select { min-height: 42px; border: 1px solid #d9dee7; background-color: #fff; }
+    #leave_application_modal textarea.form-control { min-height: 80px; }
+    #leave_application_modal .leave-field-error { color: #f1414d; font-size: 12px; margin-top: 7px; }
+    #leave_application_modal .leave-invalid { border-color: #f1414d !important; box-shadow: none !important; }
+    #leave_application_modal .leave-invalid:focus { border-color: #f1414d !important; box-shadow: 0 0 0 2px rgba(241,65,77,.08) !important; }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var form = document.getElementById('leaveApplicationForm');
+    if (!form) return;
+
+    form.noValidate = true;
+    form.querySelectorAll('[required]').forEach(function (field) {
+        field.removeAttribute('required');
+    });
+
+    var rules = {
+        employee_id: function (field) { return field.value ? '' : 'Employee is required'; },
+        leave_type_id: function (field) { return field.value ? '' : 'Leave Type is required'; },
+        start_date: function (field) { return field.value ? '' : 'Start Date is required'; },
+        end_date: function (field) {
+            if (!field.value) return 'End Date is required';
+            var start = form.elements.start_date.value;
+            return start && field.value < start ? 'End Date must be after or equal to Start Date' : '';
+        },
+        reason: function (field) {
+            var value = field.value.trim();
+            if (!value) return 'Reason is required';
+            return value.length < 3 ? 'Reason must be at least 3 characters' : '';
+        },
+        attachment: function (field) {
+            return field.files[0] && field.files[0].size > 5 * 1024 * 1024 ? 'Attachment may not be greater than 5 MB' : '';
+        }
+    };
+
+    function errorBox(field) {
+        var box = field.parentElement.querySelector('.leave-field-error');
+        if (!box) {
+            box = document.createElement('div');
+            box.className = 'leave-field-error';
+            field.insertAdjacentElement('afterend', box);
+        }
+        return box;
+    }
+
+    function validateField(field) {
+        var message = rules[field.name] ? rules[field.name](field) : '';
+        var box = errorBox(field);
+        field.classList.toggle('leave-invalid', Boolean(message));
+        field.setAttribute('aria-invalid', message ? 'true' : 'false');
+        box.textContent = message;
+        box.style.display = message ? 'block' : 'none';
+        return !message;
+    }
+
+    Object.keys(rules).forEach(function (name) {
+        var field = form.elements[name];
+        if (!field) return;
+        field.addEventListener(field.tagName === 'SELECT' || field.type === 'date' || field.type === 'file' ? 'change' : 'input', function () {
+            validateField(field);
+            if (name === 'start_date' && form.elements.end_date.value) validateField(form.elements.end_date);
+        });
+        field.addEventListener('blur', function () { validateField(field); });
+    });
+
+    form.addEventListener('submit', function (event) {
+        var firstInvalid = null;
+        Object.keys(rules).forEach(function (name) {
+            var field = form.elements[name];
+            if (field && !validateField(field) && !firstInvalid) firstInvalid = field;
+        });
+        if (firstInvalid) {
+            event.preventDefault();
+            firstInvalid.focus();
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+
+    document.getElementById('leave_application_modal').addEventListener('hidden.bs.modal', function () {
+        form.reset();
+        form.querySelectorAll('.leave-invalid').forEach(function (field) { field.classList.remove('leave-invalid'); field.removeAttribute('aria-invalid'); });
+        form.querySelectorAll('.leave-field-error').forEach(function (box) { box.remove(); });
+    });
+});
+</script>
+
 <!-- Modal: View Application Details -->
+<style>
+    #view_application_modal .modal-dialog { max-width: 670px; }
+    #view_application_modal .modal-content { border: 0; border-radius: 12px; box-shadow: 0 12px 35px rgba(15,23,42,.22); }
+    #view_application_modal .modal-header { padding: 24px 26px; border-bottom: 1px solid #e5e7eb; }
+    #view_application_modal .leave-detail-head-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; color: #00ad7b; background: #e7fbf4; }
+    #view_application_modal .leave-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 48px; padding: 26px; }
+    #view_application_modal .leave-detail-label { display: flex; align-items: center; gap: 9px; color: #6f7a90; margin-bottom: 5px; }
+    #view_application_modal .leave-detail-label i { width: 16px; }
+    #view_application_modal .leave-detail-value { color: #111827; font-weight: 500; word-break: break-word; }
+    #view_application_modal .leave-detail-full { grid-column: 1 / -1; }
+    @media(max-width:575px) { #view_application_modal .leave-detail-grid { grid-template-columns: 1fr; } #view_application_modal .leave-detail-full { grid-column: auto; } }
+</style>
 <div class="modal fade" id="view_application_modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="fw-bold">Leave Application Details</h2>
-                <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal">
-                    <i class="bi bi-x fs-1"></i>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="leave-detail-head-icon"><i class="bi bi-calendar3 fs-3"></i></span>
+                    <h2 class="fw-bold mb-0">Leave Application Details</h2>
                 </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body py-8 px-lg-17">
-                <div class="mb-4">
-                    <span class="fw-bold text-gray-800 fs-6">Employee: </span>
-                    <span id="view_emp_name" class="text-gray-700 fs-6"></span>
-                </div>
-                <div class="mb-4">
-                    <span class="fw-bold text-gray-800 fs-6">Reason:</span>
-                    <p id="view_reason" class="text-gray-600 bg-light p-3 rounded mt-2"></p>
-                </div>
-                <div id="attachment_block" class="mb-4 d-none">
-                    <span class="fw-bold text-gray-800 fs-6">Attachment:</span>
-                    <div class="mt-2">
-                        <a href="" id="view_attachment_link" target="_blank" class="btn btn-sm btn-light-primary fw-bold">Download Attachment</a>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+            <div class="leave-detail-grid">
+                <div><div class="leave-detail-label"><i class="bi bi-person"></i> Employee</div><div id="view_emp_name" class="leave-detail-value">—</div></div>
+                <div><div class="leave-detail-label"><i class="bi bi-tag"></i> Leave Type</div><div id="view_leave_type" class="leave-detail-value">—</div></div>
+                <div><div class="leave-detail-label"><i class="bi bi-calendar3"></i> Start Date</div><div id="view_start_date" class="leave-detail-value">—</div></div>
+                <div><div class="leave-detail-label"><i class="bi bi-calendar3"></i> End Date</div><div id="view_end_date" class="leave-detail-value">—</div></div>
+                <div><div class="leave-detail-label"><i class="bi bi-hash"></i> Total Days</div><div id="view_total_days" class="leave-detail-value">—</div></div>
+                <div><div class="leave-detail-label"><i class="bi bi-file-earmark-text"></i> Status</div><div><span id="view_status" class="badge">—</span></div></div>
+                <div class="leave-detail-full"><div class="leave-detail-label"><i class="bi bi-file-earmark-text"></i> Reason</div><div id="view_reason" class="leave-detail-value">—</div></div>
+                <div id="attachment_block" class="leave-detail-full d-none"><div class="leave-detail-label"><i class="bi bi-paperclip"></i> Attachment</div><a href="" id="view_attachment_link" target="_blank" class="btn btn-sm btn-light-primary fw-bold">Download Attachment</a></div>
             </div>
         </div>
     </div>
@@ -333,7 +434,15 @@
         document.querySelectorAll('.view-app-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.getElementById('view_emp_name').innerText = this.getAttribute('data-name');
+                document.getElementById('view_leave_type').innerText = this.getAttribute('data-leave-type') || '—';
+                document.getElementById('view_start_date').innerText = this.getAttribute('data-start-date') || '—';
+                document.getElementById('view_end_date').innerText = this.getAttribute('data-end-date') || '—';
+                document.getElementById('view_total_days').innerText = this.getAttribute('data-total-days') || '—';
                 document.getElementById('view_reason').innerText = this.getAttribute('data-reason');
+                const status = this.getAttribute('data-status') || 'Pending';
+                const statusBadge = document.getElementById('view_status');
+                statusBadge.innerText = status;
+                statusBadge.className = 'badge badge-light-' + (status === 'Approved' ? 'success' : (status === 'Rejected' ? 'danger' : 'warning'));
                 
                 const attachment = this.getAttribute('data-attachment');
                 const attachBlock = document.getElementById('attachment_block');

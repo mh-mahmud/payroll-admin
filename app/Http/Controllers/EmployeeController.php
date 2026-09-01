@@ -14,7 +14,7 @@ class EmployeeController extends Controller {
  public function store(Request $r){DB::transaction(function()use($r){$e=Employee::create($this->prepare($r,$this->validated($r)));$this->documents($r,$e);});return redirect()->route('employee-list')->with('success','Employee created successfully.');}
  public function update(Request $r,Employee $employee){DB::transaction(function()use($r,$employee){$employee->update($this->prepare($r,$this->validated($r,$employee),$employee));$this->documents($r,$employee);});return redirect()->route('employee-list')->with('success','Employee updated successfully.');}
  public function destroy(Employee $employee){$employee->documents()->delete();$employee->delete();return back()->with('success','Employee deleted successfully.');}
- public function changePassword(Request $r,Employee $employee){$data=$r->validate(['password'=>['required','string','min:6','max:72','regex:/^[0-9]+$/','confirmed']],['password.regex'=>'Password must contain numbers only.']);$employee->update(['password'=>Hash::make($data['password'])]);return back()->with('success','Password changed successfully.');}
+ public function changePassword(Request $r,Employee $employee){$data=$r->validate(['password'=>['required','string','min:6','max:72','confirmed']]);$employee->update(['password'=>Hash::make($data['password'])]);return back()->with('success','Password changed successfully.');}
  public function toggleStatus(Employee $employee){$employee->update(['login_status'=>!$employee->login_status]);return back()->with('success','Employee login status changed successfully.');}
  public function profile(Employee $employee){abort_unless($employee->profile_image&&Storage::disk('public')->exists($employee->profile_image),404);return Storage::disk('public')->response($employee->profile_image);}
  public function downloadDocument(EmployeeDocument $document){abort_unless(Storage::disk('public')->exists($document->file_path),404);$name=($document->type?->name??'employee-document').'.'.pathinfo($document->file_path,PATHINFO_EXTENSION);return Storage::disk('public')->download($document->file_path,$name);}
@@ -26,7 +26,7 @@ class EmployeeController extends Controller {
    'biometric_code'=>['required','string','max:50','regex:/^[A-Za-z0-9_-]+$/',Rule::unique('employees','biometric_code')->ignore($e?->id)],
    'name'=>['required','string','min:3','max:191','regex:/^[\pL\pM .\'-]+$/u'],
    'email'=>['required','string','email:rfc','max:191',Rule::unique('employees','email')->ignore($e?->id)],
-   'password'=>[$e?'nullable':'required','string','min:6','max:72','regex:/^[0-9]+$/'],
+   'password'=>[$e?'nullable':'required','string','min:6','max:72'],
    'phone'=>['required','string','max:30','regex:/^\+?[0-9][0-9\s().-]{6,28}$/'],
    'date_of_birth'=>['required','date','before:today'], 'gender'=>['required',Rule::in(['Male','Female','Other'])],
    'profile_image'=>['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
@@ -52,7 +52,7 @@ class EmployeeController extends Controller {
   ];
   $messages=[
    'employee_code.regex'=>'Employee ID must start with EMP followed by numbers.', 'biometric_code.regex'=>'Employee Code may contain letters, numbers, dash and underscore only.',
-   'name.regex'=>'Full Name may contain letters, spaces, apostrophes, dots and hyphens only.', 'password.regex'=>'Password must contain numbers only.',
+   'name.regex'=>'Full Name may contain letters, spaces, apostrophes, dots and hyphens only.',
    'phone.regex'=>'Enter a valid phone number.', 'emergency_contact_phone.regex'=>'Enter a valid emergency phone number.',
    'date_of_birth.before'=>'Date of Birth must be before today.', 'date_of_joining.after'=>'Joining date must be after Date of Birth.',
    'date_of_joining.before_or_equal'=>'Joining date cannot be in the future.', 'department_id.exists'=>'Select an active department belonging to the selected branch.',

@@ -1,3 +1,10 @@
+body#kt_body,
+.page,
+#kt_wrapper,
+#kt_content {
+    background-color: #f5f8fa !important;
+}
+
 .aside-dark .menu .menu-item .menu-link .menu-icon .svg-icon svg [fill]:not(.permanent):not(g) {
     transition: fill 0.3s ease;
     /*fill: #494b74;*/

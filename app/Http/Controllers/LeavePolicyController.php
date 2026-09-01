@@ -89,4 +89,10 @@ class LeavePolicyController extends Controller
         $leavePolicy->delete();
         return redirect()->route('leave-policies')->with('success', 'Leave policy deleted successfully.');
     }
+
+    public function toggleStatus(LeavePolicy $leavePolicy)
+    {
+        $leavePolicy->update(['status' => $leavePolicy->status === 'Active' ? 'Inactive' : 'Active']);
+        return back()->with('success', 'Leave policy status updated successfully.');
+    }
 }

@@ -46,7 +46,7 @@
                     </div>
                 </div>
                 <div class="card-body pt-0">
-                    <form method="POST" action="{{ $editingLeaveType ? route('leave-types-update', $editingLeaveType) : route('leave-types-store') }}">
+                    <form id="leaveTypeForm" method="POST" action="{{ $editingLeaveType ? route('leave-types-update', $editingLeaveType) : route('leave-types-store') }}" novalidate>
                         @csrf
                         @if($editingLeaveType)
                             @method('PUT')
@@ -225,6 +225,100 @@
         </div>
     </div>
 </div>
+
+<style>
+    #leaveTypeForm .leave-type-invalid { border-color: #f1414d !important; box-shadow: none !important; }
+    #leaveTypeForm .leave-type-invalid:focus { border-color: #f1414d !important; box-shadow: 0 0 0 2px rgba(241,65,77,.08) !important; }
+    #leaveTypeForm .leave-type-error { display: block; color: #f1414d; font-size: 12px; margin-top: 7px; }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('leaveTypeForm');
+        if (!form) return;
+
+        form.noValidate = true;
+        form.querySelectorAll('[required]').forEach(field => field.removeAttribute('required'));
+
+        const rules = {
+            name(field) {
+                const value = field.value.trim();
+                if (!value) return 'Leave Type Name is required';
+                if (value.length < 2) return 'Leave Type Name must be at least 2 characters';
+                if (value.length > 191) return 'Leave Type Name may not be greater than 191 characters';
+                return '';
+            },
+            max_days(field) {
+                const value = field.value.trim();
+                if (value === '') return 'Max Days / Year is required';
+                if (!/^\d+$/.test(value)) return 'Max Days / Year must be a whole number';
+                if (Number(value) < 0) return 'Max Days / Year cannot be negative';
+                return '';
+            },
+            color(field) {
+                const value = field.value.trim();
+                if (!value) return 'Color is required';
+                return /^#[0-9A-Fa-f]{6}$/.test(value) ? '' : 'Enter a valid color code, e.g. #3BB2F6';
+            },
+            status(field) {
+                return ['Active', 'Inactive'].includes(field.value) ? '' : 'Status is required';
+            }
+        };
+
+        function getErrorBox(field) {
+            const container = field.name === 'color' ? field.closest('.col-6') : field.parentElement;
+            let box = container.querySelector('.leave-type-error[data-error-for="' + field.name + '"]');
+            if (!box) {
+                box = document.createElement('span');
+                box.className = 'leave-type-error';
+                box.dataset.errorFor = field.name;
+                if (field.name === 'color') container.appendChild(box); else field.insertAdjacentElement('afterend', box);
+            }
+            return box;
+        }
+
+        function validateField(field) {
+            const message = rules[field.name] ? rules[field.name](field) : '';
+            const box = getErrorBox(field);
+            field.classList.toggle('leave-type-invalid', Boolean(message));
+            field.setAttribute('aria-invalid', message ? 'true' : 'false');
+            box.textContent = message;
+            box.style.display = message ? 'block' : 'none';
+            return !message;
+        }
+
+        Object.keys(rules).forEach(name => {
+            const field = form.elements[name];
+            if (!field) return;
+            const eventName = field.tagName === 'SELECT' ? 'change' : 'input';
+            field.addEventListener(eventName, function () {
+                if (name === 'color' && /^#[0-9A-Fa-f]{6}$/.test(field.value)) {
+                    document.getElementById('color_picker').value = field.value;
+                }
+                validateField(field);
+            });
+            field.addEventListener('blur', () => validateField(field));
+        });
+
+        const picker = document.getElementById('color_picker');
+        picker.addEventListener('input', function () {
+            form.elements.color.value = picker.value.toUpperCase();
+            validateField(form.elements.color);
+        });
+
+        form.addEventListener('submit', function (event) {
+            let firstInvalid = null;
+            Object.keys(rules).forEach(name => {
+                const field = form.elements[name];
+                if (field && !validateField(field) && !firstInvalid) firstInvalid = field;
+            });
+            if (firstInvalid) {
+                event.preventDefault();
+                firstInvalid.focus();
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    });
+</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

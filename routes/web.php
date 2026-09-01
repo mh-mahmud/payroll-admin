@@ -359,6 +359,7 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
 	Route::get('leave-policies', [LeavePolicyController::class, 'index'])->name('leave-policies')->middleware(['check-permission']);
 	Route::post('leave-policies-store', [LeavePolicyController::class, 'store'])->name('leave-policies-store');
 	Route::put('leave-policies-update/{leavePolicy}', [LeavePolicyController::class, 'update'])->name('leave-policies-update');
+	Route::patch('leave-policies-toggle-status/{leavePolicy}', [LeavePolicyController::class, 'toggleStatus'])->name('leave-policies-toggle-status')->defaults('permission_name','leave-policies')->middleware(['check-permission']);
 	Route::delete('leave-policies-delete/{leavePolicy}', [LeavePolicyController::class, 'destroy'])->name('leave-policies-delete')->middleware(['check-permission']);
 
 	// Leave Applications routes

@@ -13,6 +13,72 @@
 function openBranchModal(mode,encoded){var form=document.getElementById('branchForm'),data=encoded?JSON.parse(atob(encoded)):{},view=mode==='view';form.reset();document.getElementById('branchMethod').innerHTML='';form.action=@json(route('organization.store','branches'));document.getElementById('branchModalTitle').textContent=mode==='add'?'Add New Branch':(mode==='edit'?'Edit Branch':'Branch Details');document.getElementById('branchFields').style.display=view?'none':'';document.getElementById('branchDetails').style.display=view?'grid':'none';document.getElementById('branchFooter').style.display=view?'none':'';document.getElementById('branchDetailIcon').style.display=view?'grid':'none';['name','address','city','state','country','postal_code','contact','email','status'].forEach(function(key){if(form.elements[key])form.elements[key].value=data[key]??(key==='status'?1:'');var output=document.querySelector('[data-detail="'+key+'"]');if(output){if(key==='status')output.innerHTML='<span class="badge badge-light-'+(Number(data.status)?'success':'danger')+'">'+(Number(data.status)?'Active':'Inactive')+'</span>';else output.textContent=data[key]||'—'}});if(mode==='edit'){form.action=@json(route('organization.update',['branches','__ID__'])).replace('__ID__',data.id);document.getElementById('branchMethod').innerHTML='<input type="hidden" name="_method" value="PUT">'}}
 document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.branch-confirm').forEach(function(form){form.addEventListener('submit',function(e){if(form.dataset.ok)return;e.preventDefault();Swal.fire({title:form.dataset.message,icon:'warning',showCancelButton:true,buttonsStyling:false,confirmButtonText:'Yes, continue',cancelButtonText:'Cancel',customClass:{confirmButton:'btn btn-success',cancelButton:'btn btn-light ms-3'}}).then(function(r){if(r.isConfirmed||r.value){form.dataset.ok='1';form.submit()}})})});@if($errors->any())new bootstrap.Modal(document.getElementById('branchModal')).show();@endif});
 </script>
+<style>
+.branch-modal .branch-invalid{border-color:#f1414d!important;box-shadow:none!important}
+.branch-modal .branch-validation-error{display:block;color:#f1414d;font-size:12px;margin-top:6px}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+    var form=document.getElementById('branchForm');
+    if(!form)return;
+    form.noValidate=true;
+    form.querySelectorAll('[required],[minlength],[maxlength],[pattern]').forEach(function(field){
+        field.removeAttribute('required');
+        field.removeAttribute('minlength');
+        field.removeAttribute('maxlength');
+        field.removeAttribute('pattern');
+    });
+
+    var rules={
+        name:function(field){
+            var value=field.value.trim();
+            if(!value)return 'Branch Name is required';
+            if(value.length<2)return 'Branch Name must be at least 2 characters';
+            if(value.length>100)return 'Branch Name may not be greater than 100 characters';
+            return /^[A-Za-z0-9 .&()'\/-]+$/.test(value)?'':'Branch Name contains invalid characters';
+        },
+        email:function(field){
+            var value=field.value.trim();
+            if(!value)return '';
+            if(value.length>191)return 'Email may not be greater than 191 characters';
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)?'':'Enter a valid email address';
+        },
+        contact:function(field){return field.value.trim().length>30?'Phone may not be greater than 30 characters':'';},
+        address:function(field){return field.value.trim().length>500?'Address may not be greater than 500 characters':'';},
+        city:function(field){return field.value.trim().length>100?'City may not be greater than 100 characters':'';},
+        state:function(field){return field.value.trim().length>100?'State/Province may not be greater than 100 characters':'';},
+        country:function(field){return field.value.trim().length>100?'Country may not be greater than 100 characters':'';},
+        postal_code:function(field){return field.value.trim().length>20?'ZIP/Postal Code may not be greater than 20 characters':'';}
+    };
+    function errorBox(field){
+        var parent=field.parentElement,box=parent.querySelector('.branch-validation-error[data-for="'+field.name+'"]');
+        if(!box){box=document.createElement('div');box.className='branch-validation-error';box.dataset.for=field.name;field.insertAdjacentElement('afterend',box);}
+        return box;
+    }
+    function validate(field){
+        var message=rules[field.name]?rules[field.name](field):'',box=errorBox(field);
+        field.classList.toggle('branch-invalid',Boolean(message));
+        field.setAttribute('aria-invalid',message?'true':'false');
+        box.textContent=message;box.style.display=message?'block':'none';
+        return !message;
+    }
+    function clearErrors(){
+        form.querySelectorAll('.branch-invalid').forEach(function(field){field.classList.remove('branch-invalid');field.removeAttribute('aria-invalid');});
+        form.querySelectorAll('.branch-validation-error').forEach(function(box){box.remove();});
+    }
+    Object.keys(rules).forEach(function(name){
+        var field=form.elements[name];if(!field)return;
+        field.addEventListener('input',function(){validate(field)});
+        field.addEventListener('blur',function(){validate(field)});
+    });
+    form.addEventListener('submit',function(event){
+        var firstInvalid=null;
+        Object.keys(rules).forEach(function(name){var field=form.elements[name];if(field&&!validate(field)&&!firstInvalid)firstInvalid=field;});
+        if(firstInvalid){event.preventDefault();firstInvalid.focus();firstInvalid.scrollIntoView({behavior:'smooth',block:'center'});}
+    });
+    document.getElementById('branchModal').addEventListener('show.bs.modal',clearErrors);
+});
+</script>
 <script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.branch-table tbody td:nth-child(5)').forEach(function(cell){var date=cell.textContent.replace('▣','').trim();cell.innerHTML='<span class="d-inline-flex align-items-center gap-2"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg><span>'+date+'</span></span>';});});</script>
 @elseif($type==='departments')
 <style>.dept-action{border:0;background:transparent;color:#718096;padding:4px}.dept-action:hover{color:#00ad7b}.dept-action svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.dept-table thead{background:#f2f2f3}.dept-table td,.dept-table th{padding:15px 18px}.dept-table th:first-child,.dept-table td:first-child{width:64px;padding-left:24px}.dept-search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;color:#7c899e}.dept-search-icon svg{width:18px;fill:none;stroke:currentColor;stroke-width:2}.dept-modal .modal-dialog{max-width:576px}.dept-modal .modal-content{border:0;border-radius:11px;box-shadow:0 3px 9px rgba(15,23,42,.18);overflow:hidden}.dept-modal .modal-header{min-height:76px;padding:18px 24px;border-bottom:1px solid #e7e9ed}.dept-modal .modal-body{padding:31px 25px 25px}.dept-modal textarea{min-height:82px}.dept-detail-head-icon{display:none;place-items:center;width:36px;height:36px;flex:0 0 36px;border-radius:10px;background:#e7faf3;color:#00ad7b}.dept-detail-head-icon svg,.dept-detail-label svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.dept-detail-head-icon svg{width:22px;height:22px}.dept-detail-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:45px;row-gap:18px}.dept-detail-label{display:flex;align-items:center;gap:8px;color:#6e7890;font-size:14px;line-height:20px;margin-bottom:3px}.dept-detail-label svg{width:17px;height:17px;flex:0 0 17px}.dept-detail-value{color:#172033;font-size:14px;font-weight:500;line-height:21px;word-break:break-word}.dept-detail-description{grid-column:1/-1}.dept-detail-status{display:inline-flex;padding:2px 8px;border:1px solid #a7e8c8;border-radius:7px;background:#edfff5;color:#008a54;font-size:12px;line-height:18px;font-weight:500}.dept-detail-status.is-inactive{border-color:#f1b5b5;background:#fff1f1;color:#c72d2d}@media(max-width:575px){.dept-modal .modal-dialog{margin:12px}.dept-modal .modal-body{padding:24px}.dept-detail-grid{grid-template-columns:1fr}.dept-detail-description{grid-column:auto}}</style>
@@ -76,4 +142,51 @@ document.addEventListener('DOMContentLoaded',function(){var form=document.getEle
 @else
 <div class="toolbar"><div class="container-fluid d-flex flex-stack"><h1 class="fs-3 fw-bolder">{{ $title }}</h1><a class="btn btn-sm btn-success" href="{{ route('organization.create',$type) }}">Add {{ rtrim($title,'s') }}</a></div></div><div class="container-fluid py-6">@if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif<div class="card"><div class="card-body p-0"><table class="table table-row-bordered align-middle"><thead><tr><th class="ps-5">#</th><th>Name</th><th>Code</th><th>Status</th><th>Actions</th></tr></thead><tbody>@forelse($items as $item)<tr><td class="ps-5">{{ $items->firstItem()+$loop->index }}</td><td>{{ $item->name }}</td><td>{{ $item->code??'—' }}</td><td><span class="badge badge-light-{{ $item->status?'success':'danger' }}">{{ $item->status?'Active':'Inactive' }}</span></td><td><div class="d-flex gap-2"><a class="btn btn-sm btn-light-primary" href="{{ route('organization.edit',[$type,$item->id]) }}">Edit</a><form method="POST" action="{{ route('organization.destroy',[$type,$item->id]) }}" onsubmit="return confirm('Delete this item?')">@csrf @method('DELETE')<button class="btn btn-sm btn-light-danger">Delete</button></form></div></td></tr>@empty<tr><td colspan="5" class="text-center py-10">No records found.</td></tr>@endforelse</tbody></table></div></div><div class="mt-5">{{ $items->links() }}</div></div>
 @endif
+
+<style>
+.organization-js-invalid{border-color:#f1414d!important;box-shadow:none!important}
+.organization-js-error{display:block;color:#f1414d;font-size:12px;line-height:18px;margin-top:6px}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ function value(field){return field?(field.multiple?[...field.selectedOptions].map(function(option){return option.value}):field.value.trim()):''}
+ function target(field){
+  if(field.name==='content')return document.querySelector('.ann-rich');
+  if(field.name==='branch_ids[]'&&field.closest('#holidayForm'))return field.nextElementSibling?.querySelector('.holiday-multi-button')||field;
+  return field;
+ }
+ function attach(formId,rules,modalId){
+  var form=document.getElementById(formId);if(!form)return;
+  form.noValidate=true;
+  form.querySelectorAll('[required],[minlength],[maxlength],[pattern]').forEach(function(field){['required','minlength','maxlength','pattern'].forEach(function(attribute){field.removeAttribute(attribute)})});
+  function box(field){var host=target(field),parent=host.parentElement,error=parent.querySelector('.organization-js-error[data-for="'+field.name+'"]');if(!error){error=document.createElement('div');error.className='organization-js-error';error.dataset.for=field.name;host.insertAdjacentElement('afterend',error)}return error}
+  function validate(name){var field=form.elements[name];if(!field)return true;var message=rules[name](field,form)||'',host=target(field),error=box(field);host.classList.toggle('organization-js-invalid',Boolean(message));host.setAttribute('aria-invalid',message?'true':'false');error.textContent=message;error.style.display=message?'block':'none';return !message}
+  function clear(){form.querySelectorAll('.organization-js-invalid').forEach(function(field){field.classList.remove('organization-js-invalid');field.removeAttribute('aria-invalid')});form.querySelectorAll('.organization-js-error').forEach(function(error){error.remove()})}
+  Object.keys(rules).forEach(function(name){var field=form.elements[name];if(!field)return;['input','change','blur'].forEach(function(eventName){field.addEventListener(eventName,function(){validate(name)})})});
+  form.addEventListener('reset',function(){setTimeout(clear)});
+  form.addEventListener('submit',function(event){var first=null;Object.keys(rules).forEach(function(name){if(!validate(name)&&!first)first=form.elements[name]});if(first){event.preventDefault();target(first).focus();target(first).scrollIntoView({behavior:'smooth',block:'center'})}});
+  if(modalId){var modal=document.getElementById(modalId);if(modal)modal.addEventListener('show.bs.modal',clear)}
+ }
+ var required=function(label){return function(field){return value(field).length?'':label+' is required'}};
+ var nameRule=function(label){return function(field){var text=value(field);if(!text)return label+' is required';if(text.length<2)return label+' must be at least 2 characters';return text.length>100?label+' may not be greater than 100 characters':''}};
+ var maxRule=function(label,max){return function(field){return value(field).length>max?label+' may not be greater than '+max+' characters':''}};
+ var dateEnd=function(field,form){return value(field)&&value(form.elements.start_date)&&value(field)<value(form.elements.start_date)?'End Date must be on or after Start Date':''};
+
+ attach('departmentForm',{name:nameRule('Department Name'),branch_id:required('Branch'),description:maxRule('Description',1000)},'departmentModal');
+ attach('designationForm',{name:nameRule('Designation Name'),description:maxRule('Description',1000),department_id:required('Department')},'designationModal');
+ attach('holidayForm',{name:nameRule('Holiday Name'),category:required('Category'),start_date:required('Start Date'),end_date:dateEnd,description:maxRule('Description',500),'branch_ids[]':function(field){return value(field).length?'':'Applicable Branches is required'}},'holidayModal');
+ attach('awardForm',{name:nameRule('Award Type Name'),description:maxRule('Description',500),status:required('Status')});
+ attach('documentForm',{name:nameRule('Document Type Name'),description:maxRule('Description',500)});
+ attach('announcementForm',{
+  name:function(field){var text=value(field);if(!text)return 'Title is required';return text.length>191?'Title may not be greater than 191 characters':''},
+  category:required('Category'),
+  short_description:function(field){var text=value(field);if(!text)return 'Short Description is required';return text.length>500?'Short Description may not be greater than 500 characters':''},
+  content:function(field){var editor=window.announcementRichEditor,text=editor?editor.textContent.trim():value(field);return text?'':'Content is required'},
+  start_date:required('Start Date'),end_date:dateEnd,
+  attachment:function(field){return field.files&&field.files[0]&&field.files[0].size>5242880?'Attachment may not be greater than 5 MB':''},
+  'branch_ids[]':function(field,form){if(form.elements.is_company_wide.checked)return '';return value(field).length||value(form.elements['department_ids[]']).length?'':'Select at least one Target Branch or Department'},
+  'department_ids[]':function(field,form){if(form.elements.is_company_wide.checked)return '';return value(field).length||value(form.elements['branch_ids[]']).length?'':'Select at least one Target Branch or Department'}
+ },'announcementModal');
+});
+</script>
 @endsection
