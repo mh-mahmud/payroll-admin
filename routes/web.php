@@ -16,6 +16,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DynamicTableController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\AwardController;
 use App\Http\Controllers\LeaveTypeController;
 use App\Http\Controllers\LeavePolicyController;
 use App\Http\Controllers\LeaveApplicationController;
@@ -373,6 +374,11 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
 	// Leave Balances routes
 	Route::get('leave-balances', [LeaveBalanceController::class, 'index'])->name('leave-balances')->middleware(['check-permission']);
 	Route::post('leave-balances-sync', [LeaveBalanceController::class, 'sync'])->name('leave-balances-sync');
+
+	Route::get('awards', [AwardController::class, 'index'])->name('awards')->middleware(['check-permission']);
+	Route::post('awards', [AwardController::class, 'store'])->name('awards.store');
+	Route::put('awards/{award}', [AwardController::class, 'update'])->name('awards.update');
+	Route::delete('awards/{award}', [AwardController::class, 'destroy'])->name('awards.destroy')->middleware(['check-permission']);
 	Route::get('branches', [OrganizationController::class,'branches'])->name('branches')->middleware(['check-permission']);
 	Route::get('departments', [OrganizationController::class,'departments'])->name('departments')->middleware(['check-permission']);
 	Route::get('designations', [OrganizationController::class,'designations'])->name('designations')->middleware(['check-permission']);

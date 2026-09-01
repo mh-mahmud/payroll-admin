@@ -209,6 +209,9 @@
 							@php
 							$links = $sidebarUser->get_menu_data();
 							$links = json_decode($links);
+							$hasEmployeeLifecycleMenu = collect(array_keys((array) $links))->contains(function ($name) {
+								return strtolower(str_replace(['_', ' '], '', (string) $name)) === 'employeelifecycle';
+							});
 							$icon = config('constants.svg_icons');
 							@endphp
 
@@ -220,10 +223,11 @@
 									$blacklist = ['customers', 'invoice', 'sliders', 'blog', 'brands', 'orders', 'menucategory', 'settings', 'proposal', 'leadsform', 'leadmanagement', 'campaign', 'emailmodule', 'smsmodule', 'tasks', 'products'];
 									$currentOrganizationType = request()->route('type');
 									$isOrganizationMenu = $menuName === 'organizationstructure';
+									$isEmployeeLifecycleMenu = $menuName === 'employeelifecycle';
 									$hasCurrentChild = collect((array) $submenu)->keys()->contains(function ($routeName) {
 										return !empty($routeName) && Route::has($routeName) && request()->routeIs($routeName);
 									});
-									$menuIsOpen = $hasCurrentChild || ($isOrganizationMenu && (request()->routeIs('organization.*') || request()->routeIs('branches', 'departments', 'designations', 'shifts', 'attendance-policies', 'document-types', 'holidays', 'announcements', 'award-types')));
+									$menuIsOpen = $hasCurrentChild || ($isOrganizationMenu && (request()->routeIs('organization.*') || request()->routeIs('branches', 'departments', 'designations', 'shifts', 'attendance-policies', 'document-types', 'holidays', 'announcements', 'award-types'))) || ($isEmployeeLifecycleMenu && request()->routeIs('awards*'));
 								@endphp
 								@if(in_array($menuName, $blacklist))
 									@continue
@@ -243,8 +247,19 @@
 									<span class="menu-arrow"></span>
 								</span>
 								<div class="menu-sub menu-sub-accordion menu-active-bg">
+									@if($isEmployeeLifecycleMenu)
+									<div class="menu-item">
+										<a class="menu-link {{ request()->routeIs('awards*') ? 'active' : '' }}" href="{{ route('awards') }}">
+											<span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+											<span class="menu-title">Awards</span>
+										</a>
+									</div>
+									@endif
 
 									@foreach($submenu as $key=>$val)
+									@if($isEmployeeLifecycleMenu && $key === 'awards')
+										@continue
+									@endif
 
 									@php
 										$key = empty($key) ? 'dashboard' : $key;
@@ -270,7 +285,6 @@
 										</a>
 									</div>
 									@endforeach
-
 								</div>
 							</div>
 							@endforeach
@@ -328,6 +342,18 @@
 									</div>
 								</div>
 							</div>
+
+							@if(!$hasEmployeeLifecycleMenu)
+							<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('awards*') ? 'here show' : '' }}">
+								<span class="menu-link">
+									<span class="menu-icon"><span class="svg-icon svg-icon-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v10h20V9a2 2 0 0 0-2-2Z"/><path d="M8 7h8M2 12h20M10 12v2h4v-2"/></svg></span></span>
+									<span class="menu-title">Employee Lifecycle</span><span class="menu-arrow"></span>
+								</span>
+								<div class="menu-sub menu-sub-accordion menu-active-bg">
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('awards*') ? 'active' : '' }}" href="{{ route('awards') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Awards</span></a></div>
+								</div>
+							</div>
+							@endif
 
 							{{-- Commented out static CMS pages
 							@if($canSeeRoute('home-page-setting-edit'))
