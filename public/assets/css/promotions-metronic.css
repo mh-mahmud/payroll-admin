@@ -1,0 +1,44 @@
+.promotion-page{width:100%;padding-left:42px!important;padding-right:42px!important;padding-top:16px!important;}
+.promotion-page .card{border:1px solid #e1e5ea;border-radius:11px;box-shadow:0 2px 5px rgba(0,0,0,.05);}
+.promotion-filter{overflow:hidden;background:#fff;}
+.promotion-filter form input,.promotion-filter form select,.promotion-modal input,.promotion-modal select,.promotion-modal textarea{height:42px;border:1px solid #dfe3e8;border-radius:8px;background:#fff;padding:9px 13px;color:#181c32;font:inherit;outline:none;}
+.promotion-search{flex:0 0 255px;min-width:255px;}
+.promotion-search input{display:block;width:100%!important;max-width:100%!important;padding-left:42px!important;}
+.promotion-search svg{top:50%!important;transform:translateY(-50%);z-index:2;}
+.promotion-modal textarea{height:auto;min-height:80px;resize:vertical;}
+.promotion-filter form input:focus,.promotion-filter form select:focus,.promotion-modal input:focus,.promotion-modal select:focus,.promotion-modal textarea:focus{border-color:#00b67a;box-shadow:0 0 0 2px rgba(0,182,122,.08);}
+.promotion-filter .btn{height:42px;}
+.promotion-card .table-wrap{overflow-x:auto;}
+.promotion-table{margin:0;min-width:1120px;}
+.promotion-table thead{background:#f2f2f3;}
+.promotion-table th{color:#6b7280;font-weight:600;white-space:nowrap;}
+.promotion-table th,.promotion-table td{padding-left:16px!important;padding-right:16px!important;}
+.promotion-table th:first-child,.promotion-table td:first-child{padding-left:22px!important;width:54px;}
+.promotion-table td{vertical-align:middle;color:#181c32;}
+.promotion-table tbody tr:last-child td{border-bottom:0;}
+.promotion-table tbody tr td[colspan]{height:72px;text-align:center;color:#7e8299;}
+.promotion-footer{border-top:1px solid #eff1f4;color:#7e8299;padding-left:22px!important;padding-right:22px!important;}
+.promotion-actions button,.promotion-actions a{display:inline-flex;align-items:center;justify-content:center;color:#718096;line-height:1;}
+.promotion-actions button:hover,.promotion-actions a:hover{color:#00ad7b;}
+.promotion-actions svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.promotion-calendar-icon{width:17px;height:17px;margin-right:8px;vertical-align:-3px;fill:none;stroke:#718096;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.promotion-calendar-icon>*{display:none;}
+.promotion-calendar-icon{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='13' r='7'/%3E%3Cpath d='M12 10v4l2.5 1.5M5 4 2.5 6.5M19 4l2.5 2.5M7 20l-2 2M17 20l2 2M9 2h6'/%3E%3C/svg%3E") center/contain no-repeat;}
+.promotion-overlay{position:fixed;inset:0;z-index:1060;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.38);}
+.promotion-overlay.open{display:flex;}
+.promotion-modal{width:min(510px,100%);max-height:94vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 18px 55px rgba(0,0,0,.22);}
+.promotion-modal.wide{width:min(670px,100%);}
+.promotion-modal-head{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #e5e7eb;}
+.promotion-modal-head h2{margin:0;font-size:19px;font-weight:600;}
+.promotion-modal-body{padding:22px 24px;}
+.promotion-modal-body label{display:block;margin-bottom:17px;color:#181c32;font-weight:500;}
+.promotion-modal-body label>input,.promotion-modal-body label>select,.promotion-modal-body label>textarea{display:block;width:100%;margin-top:7px;}
+.promotion-modal-body em{color:#f1416c;font-style:normal;}
+.promotion-modal-footer{display:flex;justify-content:flex-end;gap:9px;padding:14px 24px;border-top:1px solid #e5e7eb;}
+.promotion-modal .btn.primary{background:#00b67a;border-color:#00b67a;color:#fff;}
+.modal-close{border:0;background:transparent;color:#5e6278;font-size:24px;line-height:1;cursor:pointer;}
+.promotion-invalid{border-color:#f1416c!important;}
+.promotion-error{color:#f1416c;font-size:12px;margin-top:6px;}
+.promotion-tabs a{text-decoration:none;}
+.promotion-status{font-weight:500;white-space:nowrap;}
+@media(max-width:900px){.promotion-page{padding-left:18px!important;padding-right:18px!important;}.promotion-search{width:100%;}.promotion-filter select,.promotion-filter input[type=date]{width:calc(50% - 5px);}.promotion-footer{gap:12px;flex-wrap:wrap;}}

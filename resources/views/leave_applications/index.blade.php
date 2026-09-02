@@ -241,12 +241,13 @@
                     <!-- Employee -->
                     <div class="mb-5 fv-row">
                         <label class="required fs-6 fw-bold mb-2">Employee</label>
-                        <select name="employee_id" class="form-select form-select-solid" required>
+                        <select name="{{ $isEmployee ? 'display_employee_id' : 'employee_id' }}" class="form-select form-select-solid" required {{ $isEmployee ? 'disabled' : '' }}>
                             <option value="">Select Employee</option>
                             @foreach($employees as $emp)
-                                <option value="{{ $emp->id }}">{{ $emp->name }}</option>
+                                <option value="{{ $emp->id }}" {{ $isEmployee ? 'selected' : '' }}>{{ $emp->name }}</option>
                             @endforeach
                         </select>
+                        @if($isEmployee)<input type="hidden" name="employee_id" value="{{ $employees->first()?->id }}">@endif
                     </div>
 
                     <!-- Leave Type -->

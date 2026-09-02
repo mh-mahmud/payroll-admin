@@ -225,13 +225,11 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
 
     //promotion route
 	Route::get('/promotion', [PromotionController::class, 'index'])->name('promotion-index')->middleware(['check-permission']);
-	Route::get('/promotion/create', [PromotionController::class, 'create'])->name('promotion-create')->middleware(['check-permission']);
 	Route::post('/promotion', [PromotionController::class, 'store'])->name('promotion-store');
-	Route::get('/promotion/{id?}', [PromotionController::class, 'show'])->name('promotion-show')->middleware(['check-permission']);
-	Route::get('/promotion/{id?}/edit', [PromotionController::class, 'edit'])->name('promotion-edit')->middleware(['check-permission']);
-	Route::put('/promotion/{id}', [PromotionController::class, 'update'])->name('promotion-update');
-	Route::delete('/promotion/{id?}', [PromotionController::class, 'destroy'])->name('promotion-destroy');
-	Route::post('/promotion/search', [PromotionController::class, 'search'])->name('promotion-search');
+	Route::put('/promotion/{promotion}', [PromotionController::class, 'update'])->name('promotion-update');
+	Route::patch('/promotion/{promotion}/status', [PromotionController::class, 'status'])->name('promotion-status');
+	Route::get('/promotion/{promotion}/document', [PromotionController::class, 'document'])->name('promotion-document');
+	Route::delete('/promotion/{promotion}', [PromotionController::class, 'destroy'])->name('promotion-destroy');
 
 
 
@@ -365,8 +363,8 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
 	Route::delete('leave-policies-delete/{leavePolicy}', [LeavePolicyController::class, 'destroy'])->name('leave-policies-delete')->middleware(['check-permission']);
 
 	// Leave Applications routes
-	Route::get('leave-applications', [LeaveApplicationController::class, 'index'])->name('leave-applications')->middleware(['check-permission']);
-	Route::post('leave-applications-store', [LeaveApplicationController::class, 'store'])->name('leave-applications-store');
+	Route::get('leave-applications', [LeaveApplicationController::class, 'index'])->name('leave-applications')->withoutMiddleware(['auth', 'check-permission']);
+	Route::post('leave-applications-store', [LeaveApplicationController::class, 'store'])->name('leave-applications-store')->withoutMiddleware(['auth', 'check-permission']);
 	Route::post('leave-applications-approve/{leaveApplication}', [LeaveApplicationController::class, 'approve'])->name('leave-applications-approve');
 	Route::post('leave-applications-reject/{leaveApplication}', [LeaveApplicationController::class, 'reject'])->name('leave-applications-reject');
 	Route::delete('leave-applications-delete/{leaveApplication}', [LeaveApplicationController::class, 'destroy'])->name('leave-applications-delete')->middleware(['check-permission']);

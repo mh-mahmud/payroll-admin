@@ -8,17 +8,28 @@ use App\Models\LeaveType;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class LeaveApplicationController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware(function ($request, $next) {
+            if (!Auth::check() && !Auth::guard('employee')->check()) {
+                return redirect()->route('login');
+            }
+            return $next($request);
+        });
     }
 
     public function index(Request $request)
     {
+        $loggedEmployee = Auth::guard('employee')->user();
         $query = LeaveApplication::with(['employee', 'leaveType']);
+
+        if ($loggedEmployee) {
+            $query->where('employee_id', $loggedEmployee->id);
+        }
 
         if ($request->filled('search')) {
             $query->whereHas('employee', function ($q) use ($request) {
@@ -27,7 +38,7 @@ class LeaveApplicationController extends Controller
             });
         }
 
-        if ($request->filled('employee_id')) {
+        if (!$loggedEmployee && $request->filled('employee_id')) {
             $query->where('employee_id', $request->employee_id);
         }
 
@@ -38,21 +49,25 @@ class LeaveApplicationController extends Controller
         $tab = $request->input('tab', 'Pending');
         $query->where('status', $tab);
 
-        $counts = [
-            'Pending' => LeaveApplication::where('status', 'Pending')->count(),
-            'Approved' => LeaveApplication::where('status', 'Approved')->count(),
-            'Rejected' => LeaveApplication::where('status', 'Rejected')->count(),
-        ];
+        $countQuery = fn ($status) => LeaveApplication::where('status', $status)
+            ->when($loggedEmployee, fn ($q) => $q->where('employee_id', $loggedEmployee->id))->count();
+        $counts = ['Pending' => $countQuery('Pending'), 'Approved' => $countQuery('Approved'), 'Rejected' => $countQuery('Rejected')];
 
         $applications = $query->latest()->paginate(10)->withQueryString();
-        $employees = Employee::where('employment_status', 'Active')->get();
+        $employees = Employee::where('employment_status', 'Active')
+            ->when($loggedEmployee, fn ($q) => $q->whereKey($loggedEmployee->id))->get();
         $leaveTypes = LeaveType::where('status', 'Active')->get();
 
-        return view('leave_applications.index', compact('applications', 'employees', 'leaveTypes', 'counts', 'tab'));
+        $isEmployee = (bool) $loggedEmployee;
+        return view('leave_applications.index', compact('applications', 'employees', 'leaveTypes', 'counts', 'tab', 'isEmployee'));
     }
 
     public function store(Request $request)
     {
+        $loggedEmployee = Auth::guard('employee')->user();
+        if ($loggedEmployee) {
+            $request->merge(['employee_id' => $loggedEmployee->id]);
+        }
         $validated = $request->validate([
             'employee_id' => 'required|exists:employees,id',
             'leave_type_id' => 'required|exists:leave_types,id',
