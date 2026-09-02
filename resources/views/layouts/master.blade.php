@@ -227,7 +227,7 @@
 									$hasCurrentChild = collect((array) $submenu)->keys()->contains(function ($routeName) {
 										return !empty($routeName) && Route::has($routeName) && request()->routeIs($routeName);
 									});
-									$menuIsOpen = $hasCurrentChild || ($isOrganizationMenu && (request()->routeIs('organization.*') || request()->routeIs('branches', 'departments', 'designations', 'shifts', 'attendance-policies', 'document-types', 'holidays', 'announcements', 'award-types'))) || ($isEmployeeLifecycleMenu && request()->routeIs('awards*'));
+									$menuIsOpen = $hasCurrentChild || ($isOrganizationMenu && (request()->routeIs('organization.*') || request()->routeIs('branches', 'departments', 'designations', 'shifts', 'attendance-policies', 'document-types', 'holidays', 'announcements', 'award-types'))) || ($isEmployeeLifecycleMenu && request()->routeIs('awards*', 'promotion-*'));
 								@endphp
 								@if(in_array($menuName, $blacklist))
 									@continue
@@ -252,6 +252,12 @@
 										<a class="menu-link {{ request()->routeIs('awards*') ? 'active' : '' }}" href="{{ route('awards') }}">
 											<span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
 											<span class="menu-title">Awards</span>
+										</a>
+									</div>
+									<div class="menu-item">
+										<a class="menu-link {{ request()->routeIs('promotion-*') ? 'active' : '' }}" href="{{ route('promotion-index') }}">
+											<span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+											<span class="menu-title">Promotions</span>
 										</a>
 									</div>
 									@endif
@@ -344,14 +350,15 @@
 							</div>
 
 							@if(!$hasEmployeeLifecycleMenu)
-							<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('awards*') ? 'here show' : '' }}">
+			<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('awards*', 'promotion-*') ? 'here show' : '' }}">
 								<span class="menu-link">
 									<span class="menu-icon"><span class="svg-icon svg-icon-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v10h20V9a2 2 0 0 0-2-2Z"/><path d="M8 7h8M2 12h20M10 12v2h4v-2"/></svg></span></span>
 									<span class="menu-title">Employee Lifecycle</span><span class="menu-arrow"></span>
 								</span>
-								<div class="menu-sub menu-sub-accordion menu-active-bg">
-									<div class="menu-item"><a class="menu-link {{ request()->routeIs('awards*') ? 'active' : '' }}" href="{{ route('awards') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Awards</span></a></div>
-								</div>
+				<div class="menu-sub menu-sub-accordion menu-active-bg">
+					<div class="menu-item"><a class="menu-link {{ request()->routeIs('awards*') ? 'active' : '' }}" href="{{ route('awards') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Awards</span></a></div>
+					<div class="menu-item"><a class="menu-link {{ request()->routeIs('promotion-*') ? 'active' : '' }}" href="{{ route('promotion-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Promotions</span></a></div>
+				</div>
 							</div>
 							@endif
 
