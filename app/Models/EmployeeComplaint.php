@@ -1,0 +1,3 @@
+<?php
+namespace App\Models;use Illuminate\Database\Eloquent\Model;
+class EmployeeComplaint extends Model{protected $guarded=[];protected $casts=['complaint_date'=>'date','resolution_deadline'=>'date','resolution_date'=>'date','follow_up_date'=>'date','is_anonymous'=>'boolean'];public function complainant(){return $this->belongsTo(Employee::class,'complainant_id');}public function against(){return $this->belongsTo(Employee::class,'against_id');}public function type(){return $this->belongsTo(ComplaintType::class,'complaint_type_id');}public function assignee(){return $this->belongsTo(Employee::class,'assigned_to');}}

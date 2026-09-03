@@ -229,7 +229,7 @@
 									$hasCurrentChild = collect((array) $submenu)->keys()->contains(function ($routeName) {
 										return !empty($routeName) && Route::has($routeName) && request()->routeIs($routeName);
 									});
-									$menuIsOpen = $hasCurrentChild || ($isOrganizationMenu && (request()->routeIs('organization.*') || request()->routeIs('branches', 'departments', 'designations', 'shifts', 'attendance-policies', 'document-types', 'holidays', 'announcements', 'award-types'))) || ($isEmployeeLifecycleMenu && request()->routeIs('awards*', 'promotion-*', 'transfers-*', 'warnings-*'));
+									$menuIsOpen = $hasCurrentChild || ($isOrganizationMenu && (request()->routeIs('organization.*') || request()->routeIs('branches', 'departments', 'designations', 'shifts', 'attendance-policies', 'document-types', 'holidays', 'announcements', 'award-types'))) || ($isEmployeeLifecycleMenu && request()->routeIs('awards*', 'promotion-*', 'transfers-*', 'warnings-*', 'resignations-*', 'termination-types-*', 'terminations-*', 'complaint-types-*', 'complaints-*'));
 								@endphp
 								@if(in_array($menuName, $blacklist))
 									@continue
@@ -268,6 +268,11 @@
 										</a>
 									</div>
 									<div class="menu-item"><a class="menu-link {{ request()->routeIs('warnings-*') ? 'active' : '' }}" href="{{ route('warnings-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Warnings</span></a></div>
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('resignations-*') ? 'active' : '' }}" href="{{ route('resignations-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Resignations</span></a></div>
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('termination-types-*') ? 'active' : '' }}" href="{{ route('termination-types-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Termination Types</span></a></div>
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('terminations-*') ? 'active' : '' }}" href="{{ route('terminations-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Terminations</span></a></div>
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('complaint-types-*') ? 'active' : '' }}" href="{{ route('complaint-types-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Complaint Types</span></a></div>
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('complaints-*') ? 'active' : '' }}" href="{{ route('complaints-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Complaints</span></a></div>
 									@endif
 
 									@foreach($submenu as $key=>$val)
@@ -358,7 +363,7 @@
 							</div>
 
 							@if(!$hasEmployeeLifecycleMenu)
-			<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('awards*', 'promotion-*', 'transfers-*', 'warnings-*') ? 'here show' : '' }}">
+			<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('awards*', 'promotion-*', 'transfers-*', 'warnings-*', 'resignations-*', 'termination-types-*', 'terminations-*', 'complaint-types-*', 'complaints-*') ? 'here show' : '' }}">
 								<span class="menu-link">
 									<span class="menu-icon"><span class="svg-icon svg-icon-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v10h20V9a2 2 0 0 0-2-2Z"/><path d="M8 7h8M2 12h20M10 12v2h4v-2"/></svg></span></span>
 									<span class="menu-title">Employee Lifecycle</span><span class="menu-arrow"></span>
@@ -368,6 +373,11 @@
 					<div class="menu-item"><a class="menu-link {{ request()->routeIs('promotion-*') ? 'active' : '' }}" href="{{ route('promotion-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Promotions</span></a></div>
 					<div class="menu-item"><a class="menu-link {{ request()->routeIs('transfers-*') ? 'active' : '' }}" href="{{ route('transfers-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Transfers</span></a></div>
 					<div class="menu-item"><a class="menu-link {{ request()->routeIs('warnings-*') ? 'active' : '' }}" href="{{ route('warnings-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Warnings</span></a></div>
+					<div class="menu-item"><a class="menu-link {{ request()->routeIs('termination-types-*') ? 'active' : '' }}" href="{{ route('termination-types-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Termination Types</span></a></div>
+					<div class="menu-item"><a class="menu-link {{ request()->routeIs('terminations-*') ? 'active' : '' }}" href="{{ route('terminations-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Terminations</span></a></div>
+					<div class="menu-item"><a class="menu-link {{ request()->routeIs('complaint-types-*') ? 'active' : '' }}" href="{{ route('complaint-types-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Complaint Types</span></a></div>
+					<div class="menu-item"><a class="menu-link {{ request()->routeIs('complaints-*') ? 'active' : '' }}" href="{{ route('complaints-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Complaints</span></a></div>
+					<div class="menu-item"><a class="menu-link {{ request()->routeIs('resignations-*') ? 'active' : '' }}" href="{{ route('resignations-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Resignations</span></a></div>
 				</div>
 							</div>
 							@endif

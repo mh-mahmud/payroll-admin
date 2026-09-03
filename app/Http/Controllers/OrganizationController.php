@@ -468,10 +468,6 @@ class OrganizationController extends Controller
             $nameRules[] = Rule::unique("departments", "name")
                 ->where(fn($q) => $q->where("branch_id", $r->branch_id))
                 ->ignore($id);
-            $r->validate(
-                ["branch_id" => "required|exists:branches,id"],
-                ["branch_id.required" => "Please select a branch."]
-            );
         }
         if ($type === "designations") {
             $nameRules[] = Rule::unique("designations", "name")
