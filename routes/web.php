@@ -40,6 +40,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductSpecificationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\TransferController;
+use App\Http\Controllers\WarningController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ShippingMethodController;
 use App\Http\Controllers\SliderController;
@@ -230,6 +232,18 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
 	Route::patch('/promotion/{promotion}/status', [PromotionController::class, 'status'])->name('promotion-status');
 	Route::get('/promotion/{promotion}/document', [PromotionController::class, 'document'])->name('promotion-document');
 	Route::delete('/promotion/{promotion}', [PromotionController::class, 'destroy'])->name('promotion-destroy');
+	Route::get('/transfers', [TransferController::class, 'index'])->name('transfers-index')->middleware(['check-permission']);
+	Route::post('/transfers', [TransferController::class, 'store'])->name('transfers-store');
+	Route::put('/transfers/{transfer}', [TransferController::class, 'update'])->name('transfers-update');
+	Route::patch('/transfers/{transfer}/status', [TransferController::class, 'status'])->name('transfers-status');
+	Route::get('/transfers/{transfer}/document', [TransferController::class, 'document'])->name('transfers-document');
+	Route::delete('/transfers/{transfer}', [TransferController::class, 'destroy'])->name('transfers-destroy');
+	Route::get('/warnings', [WarningController::class, 'index'])->name('warnings-index')->middleware(['check-permission']);
+	Route::post('/warnings', [WarningController::class, 'store'])->name('warnings-store');
+	Route::put('/warnings/{warning}', [WarningController::class, 'update'])->name('warnings-update');
+	Route::patch('/warnings/{warning}/status', [WarningController::class, 'status'])->name('warnings-status');
+	Route::get('/warnings/{warning}/document', [WarningController::class, 'document'])->name('warnings-document');
+	Route::delete('/warnings/{warning}', [WarningController::class, 'destroy'])->name('warnings-destroy');
 
 
 

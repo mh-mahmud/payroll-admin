@@ -36,7 +36,7 @@ class PromotionController extends Controller
 
     private function savePromotion(Request $request,Promotion $promotion): void
     {
-        $data=$request->validate(['employee_id'=>'required|exists:employees,id','new_designation_id'=>'required|exists:designations,id','promotion_date'=>'required|date','effective_date'=>'required|date|after_or_equal:promotion_date','reason'=>'nullable|string|max:2000','document'=>'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120','status'=>'required|in:Pending,Approved,Rejected']);
+        $data=$request->validate(['employee_id'=>'required|exists:employees,id','new_designation_id'=>'required|exists:designations,id','promotion_date'=>'required|date','effective_date'=>'nullable|date|after_or_equal:promotion_date','reason'=>'nullable|string|max:2000','document'=>'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120','status'=>'required|in:Pending,Approved,Rejected']);
         $employee=Employee::findOrFail($data['employee_id']);
         if(!$employee->designation_id)throw \Illuminate\Validation\ValidationException::withMessages(['employee_id'=>'The selected employee has no current designation.']);
         $data['previous_designation_id']=$employee->designation_id;
