@@ -4,6 +4,7 @@ use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BloggerCategoryController;
+use App\Http\Controllers\AttendancePolicyController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\CareerController;
@@ -618,6 +619,21 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
         Artisan::call('migrate');
         return 'Migrated';
     });
+
+    Route::resource(
+        'attendance-policies',
+        AttendancePolicyController::class
+    )
+    ->parameters([
+        'attendance-policies' => 'attendancePolicy'
+    ])
+    ->only([
+        'index',
+        'store',
+        'show',
+        'update',
+        'destroy',
+    ]);
 
 
 });
