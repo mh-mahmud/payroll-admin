@@ -55,7 +55,7 @@
             </div>
 
             <div class="stat-icon gray">
-                🛡
+                <div class="relative z-10 p-3 bg-gray-100 dark:bg-gray-700 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield h-7 w-7 text-gray-600 dark:text-gray-400"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg></div>
             </div>
 
         </div>
@@ -84,7 +84,7 @@
             </div>
 
             <div class="stat-icon green">
-                ✓
+                <div class="relative z-10 p-3 bg-green-100 dark:bg-green-900/40 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big h-7 w-7 text-green-600 dark:text-green-400"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></div>
             </div>
 
         </div>
@@ -116,7 +116,7 @@
             </div>
 
             <div class="stat-icon orange">
-                ◷
+                <div class="relative z-10 p-3 bg-orange-100 dark:bg-orange-900/40 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock h-7 w-7 text-orange-600 dark:text-orange-400"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
             </div>
 
         </div>
@@ -146,7 +146,7 @@
             </div>
 
             <div class="stat-icon green">
-                $
+                <div class="relative z-10 p-3 bg-green-100 dark:bg-green-900/40 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign h-7 w-7 text-green-600 dark:text-green-400"><line x1="12" x2="12" y1="2" y2="22"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
             </div>
 
         </div>
