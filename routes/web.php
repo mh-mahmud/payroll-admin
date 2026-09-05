@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BloggerCategoryController;
 use App\Http\Controllers\AttendancePolicyController;
+use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\CareerController;
@@ -105,7 +106,8 @@ Route::get('/clear-all', function () {
 
 
 // new routes for new theme
-Route::get('/', [FrontController::class, 'home'])->name('home');
+/*Route::get('/', [FrontController::class, 'home'])->name('home');*/
+Route::get('/', [AuthController::class, 'index'])->name('login');
 Route::get('shop-new', [FrontController::class, 'product_list'])->name('shop-new');
 Route::get('theme/login', [FrontController::class, 'theme_login'])->name('theme-login');
 Route::get('theme/register', [FrontController::class, 'theme_register'])->name('theme-register');
@@ -620,6 +622,7 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
         return 'Migrated';
     });
 
+	// attendance-policies toutes
     Route::resource(
         'attendance-policies',
         AttendancePolicyController::class
@@ -633,6 +636,19 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
         'show',
         'update',
         'destroy',
+    ]);
+
+    // shifts routes
+	Route::resource('shifts', ShiftController::class)
+    ->parameters([
+        'shifts' => 'shift'
+    ])
+    ->only([
+        'index',
+        'store',
+        'show',
+        'update',
+        'destroy'
     ]);
 
 
