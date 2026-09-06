@@ -49,6 +49,8 @@ use App\Http\Controllers\TerminationController;
 use App\Http\Controllers\TerminationTypeController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\ComplaintTypeController;
+use App\Http\Controllers\TripController;
+use App\Http\Controllers\TripExpenseController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ShippingMethodController;
 use App\Http\Controllers\SliderController;
@@ -283,6 +285,19 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
 	Route::patch('/complaints/{complaint}/follow-up', [ComplaintController::class, 'followUp'])->name('complaints-follow-up');
 	Route::get('/complaints/{complaint}/document', [ComplaintController::class, 'document'])->name('complaints-document');
 	Route::delete('/complaints/{complaint}', [ComplaintController::class, 'destroy'])->name('complaints-destroy');
+	Route::get('/trips', [TripController::class, 'index'])->name('trips-index')->middleware(['check-permission']);
+	Route::post('/trips', [TripController::class, 'store'])->name('trips-store');
+	Route::put('/trips/{trip}', [TripController::class, 'update'])->name('trips-update');
+	Route::patch('/trips/{trip}/status', [TripController::class, 'status'])->name('trips-status');
+	Route::patch('/trips/{trip}/finance', [TripController::class, 'finance'])->name('trips-finance');
+	Route::get('/trips/{trip}/document', [TripController::class, 'document'])->name('trips-document');
+	Route::delete('/trips/{trip}', [TripController::class, 'destroy'])->name('trips-destroy');
+	Route::get('/trips/{trip}/expenses', [TripExpenseController::class, 'index'])->name('trip-expenses-index');
+	Route::post('/trips/{trip}/expenses', [TripExpenseController::class, 'store'])->name('trip-expenses-store');
+	Route::put('/trips/{trip}/expenses/{expense}', [TripExpenseController::class, 'update'])->name('trip-expenses-update');
+	Route::patch('/trips/{trip}/expenses/{expense}/status', [TripExpenseController::class, 'status'])->name('trip-expenses-status');
+	Route::get('/trips/{trip}/expenses/{expense}/receipt', [TripExpenseController::class, 'receipt'])->name('trip-expenses-receipt');
+	Route::delete('/trips/{trip}/expenses/{expense}', [TripExpenseController::class, 'destroy'])->name('trip-expenses-destroy');
 
 
 

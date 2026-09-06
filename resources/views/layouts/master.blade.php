@@ -230,10 +230,28 @@
 									$hasCurrentChild = collect((array) $submenu)->keys()->contains(function ($routeName) {
 										return !empty($routeName) && Route::has($routeName) && request()->routeIs($routeName);
 									});
-									$menuIsOpen = $hasCurrentChild || ($isOrganizationMenu && (request()->routeIs('organization.*') || request()->routeIs('branches', 'departments', 'designations', 'shifts', 'attendance-policies', 'document-types', 'holidays', 'announcements', 'award-types'))) || ($isEmployeeLifecycleMenu && request()->routeIs('awards*', 'promotion-*', 'transfers-*', 'warnings-*', 'resignations-*', 'termination-types-*', 'terminations-*', 'complaint-types-*', 'complaints-*'));
+									$menuIsOpen = $hasCurrentChild || ($isOrganizationMenu && (request()->routeIs('organization.*') || request()->routeIs('branches', 'departments', 'designations', 'shifts', 'attendance-policies', 'document-types', 'holidays', 'announcements', 'award-types'))) || ($isEmployeeLifecycleMenu && request()->routeIs('awards*', 'promotion-*', 'transfers-*', 'warnings-*', 'resignations-*', 'termination-types-*', 'terminations-*', 'complaint-types-*', 'complaints-*', 'trips-*'));
 								@endphp
 								@if(in_array($menuName, $blacklist))
 									@continue
+								@endif
+								@if($menuName === 'attendance')
+									@continue
+								@endif
+								@if(false) {{-- Attendance is rendered once in the static block below. --}}
+								<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('shifts*', 'attendance-policies*') ? 'here show' : '' }}">
+									<span class="menu-link">
+										<span class="menu-icon"><span class="svg-icon svg-icon-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></span>
+										<span class="menu-title">Attendance</span><span class="menu-arrow"></span>
+									</span>
+									<div class="menu-sub menu-sub-accordion menu-active-bg">
+										<div class="menu-item"><a class="menu-link" href="javascript:void(0)"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Attendance Records</span></a></div>
+										<div class="menu-item"><a class="menu-link" href="javascript:void(0)"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Biometric Attendance</span></a></div>
+										<div class="menu-item"><a class="menu-link" href="javascript:void(0)"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Attendance Regularizations</span></a></div>
+										<div class="menu-item"><a class="menu-link {{ request()->routeIs('shifts*') ? 'active' : '' }}" href="{{ route('shifts') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Shifts</span></a></div>
+										<div class="menu-item"><a class="menu-link {{ request()->routeIs('attendance-policies*') ? 'active' : '' }}" href="{{ route('attendance-policies') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Attendance Policies</span></a></div>
+									</div>
+								</div>
 								@endif
 							<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ $menuIsOpen ? 'here show' : '' }}">
 								<span class="menu-link">
@@ -273,6 +291,7 @@
 									<div class="menu-item"><a class="menu-link {{ request()->routeIs('termination-types-*') ? 'active' : '' }}" href="{{ route('termination-types-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Termination Types</span></a></div>
 									<div class="menu-item"><a class="menu-link {{ request()->routeIs('terminations-*') ? 'active' : '' }}" href="{{ route('terminations-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Terminations</span></a></div>
 									<div class="menu-item"><a class="menu-link {{ request()->routeIs('complaint-types-*') ? 'active' : '' }}" href="{{ route('complaint-types-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Complaint Types</span></a></div>
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('trips-*') ? 'active' : '' }}" href="{{ route('trips-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Trips</span></a></div>
 									<div class="menu-item"><a class="menu-link {{ request()->routeIs('complaints-*') ? 'active' : '' }}" href="{{ route('complaints-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Complaints</span></a></div>
 									@endif
 
@@ -310,6 +329,21 @@
 							@endforeach
 
 							@endif
+
+							<!-- Attendance Menu (Timesheet intentionally excluded) -->
+							<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('shifts*', 'attendance-policies*') ? 'here show' : '' }}">
+								<span class="menu-link">
+									<span class="menu-icon"><span class="svg-icon svg-icon-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></span>
+									<span class="menu-title">Attendance</span><span class="menu-arrow"></span>
+								</span>
+								<div class="menu-sub menu-sub-accordion menu-active-bg">
+									<div class="menu-item"><a class="menu-link" href="javascript:void(0)"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Attendance Records</span></a></div>
+									<div class="menu-item"><a class="menu-link" href="javascript:void(0)"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Biometric Attendance</span></a></div>
+									<div class="menu-item"><a class="menu-link" href="javascript:void(0)"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Attendance Regularizations</span></a></div>
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('shifts.*') ? 'active' : '' }}" href="{{ route('shifts.index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Shifts</span></a></div>
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('attendance-policies.*') ? 'active' : '' }}" href="{{ route('attendance-policies.index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Attendance Policies</span></a></div>
+								</div>
+							</div>
 
 							<!-- Leave Management Menu -->
 							<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('leave-types*', 'leave-policies*', 'leave-applications*', 'leave-balances*') ? 'here show' : '' }}">
@@ -364,7 +398,7 @@
 							</div>
 
 							@if(!$hasEmployeeLifecycleMenu)
-			<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('awards*', 'promotion-*', 'transfers-*', 'warnings-*', 'resignations-*', 'termination-types-*', 'terminations-*', 'complaint-types-*', 'complaints-*') ? 'here show' : '' }}">
+			<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('awards*', 'promotion-*', 'transfers-*', 'warnings-*', 'resignations-*', 'termination-types-*', 'terminations-*', 'complaint-types-*', 'complaints-*', 'trips-*') ? 'here show' : '' }}">
 								<span class="menu-link">
 									<span class="menu-icon"><span class="svg-icon svg-icon-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v10h20V9a2 2 0 0 0-2-2Z"/><path d="M8 7h8M2 12h20M10 12v2h4v-2"/></svg></span></span>
 									<span class="menu-title">Employee Lifecycle</span><span class="menu-arrow"></span>
@@ -377,6 +411,7 @@
 					<div class="menu-item"><a class="menu-link {{ request()->routeIs('termination-types-*') ? 'active' : '' }}" href="{{ route('termination-types-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Termination Types</span></a></div>
 					<div class="menu-item"><a class="menu-link {{ request()->routeIs('terminations-*') ? 'active' : '' }}" href="{{ route('terminations-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Terminations</span></a></div>
 					<div class="menu-item"><a class="menu-link {{ request()->routeIs('complaint-types-*') ? 'active' : '' }}" href="{{ route('complaint-types-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Complaint Types</span></a></div>
+					<div class="menu-item"><a class="menu-link {{ request()->routeIs('trips-*') ? 'active' : '' }}" href="{{ route('trips-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Trips</span></a></div>
 					<div class="menu-item"><a class="menu-link {{ request()->routeIs('complaints-*') ? 'active' : '' }}" href="{{ route('complaints-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Complaints</span></a></div>
 					<div class="menu-item"><a class="menu-link {{ request()->routeIs('resignations-*') ? 'active' : '' }}" href="{{ route('resignations-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Resignations</span></a></div>
 				</div>
