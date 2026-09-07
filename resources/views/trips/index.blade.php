@@ -24,4 +24,16 @@ document.addEventListener('DOMContentLoaded',function(){
  });
 });
 </script>
+<style>.trip-invalid{border-color:#f1416c!important}.trip-validation-error{display:block;color:#f1416c;font-size:12px;margin-top:6px}</style>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ function value(field){return String(field?.value||'').trim()}
+ function required(label){return function(field){return value(field)?'':label+' is required'}}
+ function attach(formId,rules){const form=document.getElementById(formId);if(!form)return;function validate(field){const message=rules[field.name](field,form);let error=field.parentElement.querySelector('.trip-validation-error');if(!error){error=document.createElement('div');error.className='trip-validation-error';field.after(error)}field.classList.toggle('trip-invalid',!!message);error.textContent=message;error.style.display=message?'block':'none';return !message}Object.keys(rules).forEach(function(name){const field=form.elements[name];if(!field)return;['input','change','blur'].forEach(function(event){field.addEventListener(event,function(){validate(field)})})});form.onsubmit=function(event){let first=null;Object.keys(rules).forEach(function(name){const field=form.elements[name];if(field&&!validate(field)&&!first)first=field});if(first){event.preventDefault();first.focus()}}}
+ attach('tripForm',{employee_id:required('Employee'),purpose:function(field){if(!value(field))return 'Purpose is required';return value(field).length>191?'Purpose may not exceed 191 characters':''},destination:function(field){if(!value(field))return 'Destination is required';return value(field).length>191?'Destination may not exceed 191 characters':''},start_date:required('Start Date'),end_date:function(field,form){if(!value(field))return 'End Date is required';return value(form.elements.start_date)&&field.value<form.elements.start_date.value?'End Date must be after or equal to Start Date':''},advance_amount:function(field){if(!value(field))return '';return Number(field.value)<0?'Advance Amount cannot be negative':''}});
+ attach('tripStatusForm',{status:required('Status')});
+ attach('tripFinanceForm',{advance_amount:function(field){if(!value(field))return '';return Number(field.value)<0?'Advance Amount cannot be negative':''},advance_status:function(field,form){return value(form.elements.advance_amount)&&!value(field)?'Advance Status is required when Advance Amount is entered':''},expense_amount:function(field){if(!value(field))return '';return Number(field.value)<0?'Expense Amount cannot be negative':''},expense_status:function(field,form){return value(form.elements.expense_amount)&&!value(field)?'Expense Status is required when Expense Amount is entered':''}});
+ var start=document.querySelector('#tripForm [name="start_date"]');if(start)start.addEventListener('change',function(){document.querySelector('#tripForm [name="end_date"]').dispatchEvent(new Event('change'))});
+});
+</script>
 @endsection

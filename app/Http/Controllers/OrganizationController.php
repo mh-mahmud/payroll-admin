@@ -473,10 +473,6 @@ class OrganizationController extends Controller
             $nameRules[] = Rule::unique("designations", "name")
                 ->where(fn($q) => $q->where("department_id", $r->department_id))
                 ->ignore($id);
-            $r->validate(
-                ["department_id" => "required|exists:departments,id"],
-                ["department_id.required" => "Please select a department."]
-            );
         }
         if ($type === "holidays") {
             $r->validate(

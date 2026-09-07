@@ -746,7 +746,6 @@
                             <tr>
                                 <th>#</th>
                                 <th>Name</th>
-                                <th>Branch</th>
                                 <th>Status</th>
                                 <th>Created At</th>
                                 <th class="text-center">Actions</th>
@@ -757,7 +756,6 @@
                                 <tr>
                                     <td>{{ $items->firstItem() + $loop->index }}</td>
                                     <td><strong>{{ $item->name }}</strong></td>
-                                    <td>{{ $branches->firstWhere('id', $item->branch_id)->name ?? '—' }}</td>
                                     <td><span
                                             class="badge badge-light-{{ $item->status ? 'success' : 'danger' }}">{{ $item->status ? 'Active' : 'Inactive' }}</span>
                                     </td>
@@ -1196,7 +1194,6 @@
                             <tr>
                                 <th>#</th>
                                 <th>Name</th>
-                                <th>Department</th>
                                 <th>Status</th>
                                 <th>Created At</th>
                                 <th class="text-center">Actions</th>
@@ -1204,13 +1201,9 @@
                         </thead>
                         <tbody>
                             @forelse($items as $item)
-                                @php($department = $departments->firstWhere('id', $item->department_id))
                                 <tr>
                                     <td>{{ $items->firstItem() + $loop->index }}</td>
                                     <td><strong>{{ $item->name }}</strong></td>
-                                    <td>{{ $department?->name ?? '—' }}<div class="text-muted fs-8">Branch:
-                                            {{ $branches->firstWhere('id', $department?->branch_id)?->name ?? '—' }}</div>
-                                    </td>
                                     <td><span
                                             class="badge badge-light-{{ $item->status ? 'success' : 'danger' }}">{{ $item->status ? 'Active' : 'Inactive' }}</span>
                                     </td>
@@ -1294,9 +1287,10 @@
                             <div class="mb-4"><label class="form-label">Description</label>
                                 <textarea name="description" class="form-control" placeholder="Enter designation description..." maxlength="1000">{{ old('description') }}</textarea>
                             </div>
-                            <div class="mb-4"><label class="form-label required">Department</label><select
+                            {{-- Department selector is intentionally disabled; designations are company-wide.
+                            <div class="mb-4"><label class="form-label">Department</label><select
                                     name="department_id"
-                                    class="form-select @error('department_id') is-invalid @enderror" required>
+                                    class="form-select @error('department_id') is-invalid @enderror">
                                     <option value="">Select Department</option>
                                     @foreach ($departments as $department)
                                         <option value="{{ $department->id }}">{{ $department->name }}</option>
@@ -1306,12 +1300,14 @@
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
+                            --}}
                             <div><label class="form-label">Status</label><select name="status" class="form-select">
                                     <option value="1">Active</option>
                                     <option value="0">Inactive</option>
                                 </select></div>
                         </div>
                         <div id="designationDetails" class="des-detail-grid" style="display:none">
+                            {{-- Department and Branch are intentionally hidden from Designation Details.
                             <div>
                                 <div class="des-detail-label"><svg viewBox="0 0 24 24">
                                         <rect x="4" y="7" width="16" height="13" rx="2" />
@@ -1332,6 +1328,7 @@
                                     </svg>Branch</div>
                                 <div class="des-detail-value" data-designation-detail="branch">—</div>
                             </div>
+                            --}}
                             <div>
                                 <div class="des-detail-label"><svg viewBox="0 0 24 24">
                                         <rect x="5" y="10" width="14" height="11" rx="2" />
@@ -1358,9 +1355,7 @@
         function openDesignation(mode, encoded) {
             var form = document.getElementById('designationForm'),
                 data = encoded ? JSON.parse(atob(encoded)) : {},
-                view = mode === 'view',
-                departments = @json($departments->mapWithKeys(fn($department) => [$department->id => ['name' => $department->name, 'branch_id' => $department->branch_id]])),
-                branches = @json($branches->pluck('name', 'id'));
+                view = mode === 'view';
             form.reset();
             form.action = @json(route('organization.store', 'designations'));
             document.getElementById('designationMethod').innerHTML = '';
@@ -1370,18 +1365,14 @@
             document.getElementById('designationDetails').style.display = view ? 'grid' : 'none';
             document.getElementById('designationFooter').style.display = view ? 'none' : '';
             document.getElementById('designationDetailIcon').style.display = view ? 'grid' : 'none';
-            ['name', 'description', 'department_id', 'status'].forEach(function(k) {
+            ['name', 'description', 'status'].forEach(function(k) {
                 if (form.elements[k]) {
                     form.elements[k].disabled = false;
                     form.elements[k].value = data[k] ?? (k === 'status' ? 1 : '')
                 }
             });
             if (view) {
-                var department = departments[data.department_id] || {};
                 document.querySelector('[data-designation-detail="name"]').textContent = data.name || '—';
-                document.querySelector('[data-designation-detail="department"]').textContent = department.name || '—';
-                document.querySelector('[data-designation-detail="branch"]').textContent = branches[department.branch_id] ||
-                    '—';
                 document.querySelector('[data-designation-detail="description"]').textContent = data.description || '—';
                 var status = document.querySelector('[data-designation-detail="status"]'),
                     active = Number(data.status) === 1;
@@ -2340,8 +2331,7 @@
         }, 'departmentModal');
         attach('designationForm', {
             name: nameRule('Designation Name'),
-            description: maxRule('Description', 1000),
-            department_id: required('Department')
+            description: maxRule('Description', 1000)
         }, 'designationModal');
         attach('holidayForm', {
             name: nameRule('Holiday Name'),

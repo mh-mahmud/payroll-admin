@@ -212,8 +212,31 @@
 							@php
 							$links = $sidebarUser->get_menu_data();
 							$links = json_decode($links);
+							// Keep Performance Management immediately after Employee Lifecycle.
+							$linkItems = (array) $links;
+							$performanceKey = collect(array_keys($linkItems))->first(function ($name) {
+								return strtolower(str_replace(['_', ' '], '', (string) $name)) === 'performancemanagement';
+							});
+							if ($performanceKey !== null) {
+								$performanceValue = $linkItems[$performanceKey];
+								unset($linkItems[$performanceKey]);
+								$orderedLinks = [];
+								foreach ($linkItems as $linkName => $linkValue) {
+									$orderedLinks[$linkName] = $linkValue;
+									if (strtolower(str_replace(['_', ' '], '', (string) $linkName)) === 'employeelifecycle') {
+										$orderedLinks[$performanceKey] = $performanceValue;
+									}
+								}
+								if (!array_key_exists($performanceKey, $orderedLinks)) {
+									$orderedLinks[$performanceKey] = $performanceValue;
+								}
+								$links = (object) $orderedLinks;
+							}
 							$hasEmployeeLifecycleMenu = collect(array_keys((array) $links))->contains(function ($name) {
 								return strtolower(str_replace(['_', ' '], '', (string) $name)) === 'employeelifecycle';
+							});
+							$hasPerformanceMenu = collect(array_keys((array) $links))->contains(function ($name) {
+								return strtolower(str_replace(['_', ' '], '', (string) $name)) === 'performancemanagement';
 							});
 							$icon = config('constants.svg_icons');
 							@endphp
@@ -227,10 +250,11 @@
 									$currentOrganizationType = request()->route('type');
 									$isOrganizationMenu = $menuName === 'organizationstructure';
 									$isEmployeeLifecycleMenu = $menuName === 'employeelifecycle';
+									$isPerformanceMenu = $menuName === 'performancemanagement';
 									$hasCurrentChild = collect((array) $submenu)->keys()->contains(function ($routeName) {
 										return !empty($routeName) && Route::has($routeName) && request()->routeIs($routeName);
 									});
-									$menuIsOpen = $hasCurrentChild || ($isOrganizationMenu && (request()->routeIs('organization.*') || request()->routeIs('branches', 'departments', 'designations', 'shifts', 'attendance-policies', 'document-types', 'holidays', 'announcements', 'award-types'))) || ($isEmployeeLifecycleMenu && request()->routeIs('awards*', 'promotion-*', 'transfers-*', 'warnings-*', 'resignations-*', 'termination-types-*', 'terminations-*', 'complaint-types-*', 'complaints-*', 'trips-*'));
+									$menuIsOpen = $hasCurrentChild || ($isOrganizationMenu && (request()->routeIs('organization.*') || request()->routeIs('branches', 'departments', 'designations', 'shifts', 'attendance-policies', 'document-types', 'holidays', 'announcements', 'award-types'))) || ($isEmployeeLifecycleMenu && request()->routeIs('awards*', 'promotion-*', 'transfers-*', 'warnings-*', 'resignations-*', 'termination-types-*', 'terminations-*', 'complaint-types-*', 'complaints-*', 'trips-*')) || ($isPerformanceMenu && request()->routeIs('review-cycles-*', 'employee-reviews-*', 'employee-goals-*', 'goal-types-*'));
 								@endphp
 								@if(in_array($menuName, $blacklist))
 									@continue
@@ -268,6 +292,12 @@
 									<span class="menu-arrow"></span>
 								</span>
 								<div class="menu-sub menu-sub-accordion menu-active-bg">
+									@if($isPerformanceMenu)
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('employee-reviews-*') ? 'active' : '' }}" href="{{ route('employee-reviews-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Employee Reviews</span></a></div>
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('employee-goals-*') ? 'active' : '' }}" href="{{ route('employee-goals-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Employee Goals</span></a></div>
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('review-cycles-*') ? 'active' : '' }}" href="{{ route('review-cycles-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Review Cycles</span></a></div>
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('goal-types-*') ? 'active' : '' }}" href="{{ route('goal-types-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Goal Types</span></a></div>
+									@endif
 									@if($isEmployeeLifecycleMenu)
 									<div class="menu-item">
 										<a class="menu-link {{ request()->routeIs('awards*') ? 'active' : '' }}" href="{{ route('awards') }}">
@@ -296,6 +326,9 @@
 									@endif
 
 									@foreach($submenu as $key=>$val)
+									@if($isPerformanceMenu && in_array(strtolower(str_replace(['_', ' ', '-'], '', (string) $key)), ['reviewcycles', 'employeereviews', 'goaltypes']))
+										@continue
+									@endif
 									@if($isEmployeeLifecycleMenu && $key === 'awards')
 										@continue
 									@endif
@@ -396,6 +429,21 @@
 									</div>
 								</div>
 							</div>
+
+							@if(!$hasPerformanceMenu)
+			<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('review-cycles-*', 'employee-reviews-*', 'employee-goals-*', 'goal-types-*') ? 'here show' : '' }}">
+				<span class="menu-link">
+					<span class="menu-icon"><span class="svg-icon svg-icon-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span></span>
+					<span class="menu-title">Performance Management</span><span class="menu-arrow"></span>
+				</span>
+				<div class="menu-sub menu-sub-accordion menu-active-bg">
+					<div class="menu-item"><a class="menu-link {{ request()->routeIs('employee-reviews-*') ? 'active' : '' }}" href="{{ route('employee-reviews-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Employee Reviews</span></a></div>
+					<div class="menu-item"><a class="menu-link {{ request()->routeIs('employee-goals-*') ? 'active' : '' }}" href="{{ route('employee-goals-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Employee Goals</span></a></div>
+					<div class="menu-item"><a class="menu-link {{ request()->routeIs('review-cycles-*') ? 'active' : '' }}" href="{{ route('review-cycles-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Review Cycles</span></a></div>
+					<div class="menu-item"><a class="menu-link {{ request()->routeIs('goal-types-*') ? 'active' : '' }}" href="{{ route('goal-types-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Goal Types</span></a></div>
+				</div>
+			</div>
+							@endif
 
 							@if(!$hasEmployeeLifecycleMenu)
 			<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('awards*', 'promotion-*', 'transfers-*', 'warnings-*', 'resignations-*', 'termination-types-*', 'terminations-*', 'complaint-types-*', 'complaints-*', 'trips-*') ? 'here show' : '' }}">
@@ -3228,6 +3276,18 @@
 		});
 	</script>
 	@yield('endScript')
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const titles = Array.from(document.querySelectorAll('#kt_aside .menu-title'));
+			const lifecycleTitle = titles.find(el => el.textContent.trim() === 'Employee Lifecycle');
+			const performanceTitle = titles.find(el => el.textContent.trim() === 'Performance Management');
+			const lifecycleMenu = lifecycleTitle && lifecycleTitle.closest('.menu-item.menu-accordion');
+			const performanceMenu = performanceTitle && performanceTitle.closest('.menu-item.menu-accordion');
+			if (lifecycleMenu && performanceMenu && lifecycleMenu !== performanceMenu) {
+				lifecycleMenu.insertAdjacentElement('afterend', performanceMenu);
+			}
+		});
+	</script>
 	<!--end::Page Custom Javascript-->
 	<!--end::Javascript-->
 </body>

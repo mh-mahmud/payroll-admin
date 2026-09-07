@@ -51,6 +51,10 @@ use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\ComplaintTypeController;
 use App\Http\Controllers\TripController;
 use App\Http\Controllers\TripExpenseController;
+use App\Http\Controllers\ReviewCycleController;
+use App\Http\Controllers\EmployeeReviewController;
+use App\Http\Controllers\GoalTypeController;
+use App\Http\Controllers\EmployeeGoalController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ShippingMethodController;
 use App\Http\Controllers\SliderController;
@@ -299,6 +303,28 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
 	Route::patch('/trips/{trip}/expenses/{expense}/status', [TripExpenseController::class, 'status'])->name('trip-expenses-status');
 	Route::get('/trips/{trip}/expenses/{expense}/receipt', [TripExpenseController::class, 'receipt'])->name('trip-expenses-receipt');
 	Route::delete('/trips/{trip}/expenses/{expense}', [TripExpenseController::class, 'destroy'])->name('trip-expenses-destroy');
+	Route::get('/review-cycles', [ReviewCycleController::class, 'index'])->name('review-cycles-index')->middleware(['check-permission']);
+	Route::post('/review-cycles', [ReviewCycleController::class, 'store'])->name('review-cycles-store');
+	Route::put('/review-cycles/{reviewCycle}', [ReviewCycleController::class, 'update'])->name('review-cycles-update');
+	Route::patch('/review-cycles/{reviewCycle}/toggle', [ReviewCycleController::class, 'toggle'])->name('review-cycles-toggle');
+	Route::delete('/review-cycles/{reviewCycle}', [ReviewCycleController::class, 'destroy'])->name('review-cycles-destroy');
+	Route::get('/employee-reviews', [EmployeeReviewController::class, 'index'])->name('employee-reviews-index')->middleware(['check-permission']);
+	Route::get('/employee-reviews/create', [EmployeeReviewController::class, 'create'])->name('employee-reviews-create');
+	Route::post('/employee-reviews', [EmployeeReviewController::class, 'store'])->name('employee-reviews-store');
+	Route::get('/employee-reviews/{employeeReview}', [EmployeeReviewController::class, 'show'])->name('employee-reviews-show');
+	Route::get('/employee-reviews/{employeeReview}/conduct', [EmployeeReviewController::class, 'conduct'])->name('employee-reviews-conduct');
+	Route::put('/employee-reviews/{employeeReview}/conduct', [EmployeeReviewController::class, 'saveConduct'])->name('employee-reviews-conduct-save');
+	Route::patch('/employee-reviews/{employeeReview}/status', [EmployeeReviewController::class, 'status'])->name('employee-reviews-status');
+	Route::delete('/employee-reviews/{employeeReview}', [EmployeeReviewController::class, 'destroy'])->name('employee-reviews-destroy');
+	Route::get('/goal-types', [GoalTypeController::class, 'index'])->name('goal-types-index')->middleware(['check-permission']);
+	Route::post('/goal-types', [GoalTypeController::class, 'store'])->name('goal-types-store');
+	Route::put('/goal-types/{goalType}', [GoalTypeController::class, 'update'])->name('goal-types-update');
+	Route::delete('/goal-types/{goalType}', [GoalTypeController::class, 'destroy'])->name('goal-types-destroy');
+	Route::get('/employee-goals', [EmployeeGoalController::class, 'index'])->name('employee-goals-index')->middleware(['check-permission']);
+	Route::post('/employee-goals', [EmployeeGoalController::class, 'store'])->name('employee-goals-store');
+	Route::put('/employee-goals/{employeeGoal}', [EmployeeGoalController::class, 'update'])->name('employee-goals-update');
+	Route::patch('/employee-goals/{employeeGoal}/progress', [EmployeeGoalController::class, 'progress'])->name('employee-goals-progress');
+	Route::delete('/employee-goals/{employeeGoal}', [EmployeeGoalController::class, 'destroy'])->name('employee-goals-destroy');
 
 
 

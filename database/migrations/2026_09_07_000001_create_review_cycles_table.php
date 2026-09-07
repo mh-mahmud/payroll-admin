@@ -1,0 +1,3 @@
+<?php
+use Illuminate\Database\Migrations\Migration;use Illuminate\Database\Schema\Blueprint;use Illuminate\Support\Facades\Schema;
+return new class extends Migration{public function up():void{if(!Schema::hasTable('review_cycles'))Schema::create('review_cycles',function(Blueprint $t){$t->id();$t->string('name')->unique();$t->enum('frequency',['Monthly','Quarterly','Semi-Annual','Annual','Custom'])->default('Annual');$t->date('start_date');$t->date('end_date');$t->text('description')->nullable();$t->boolean('status')->default(true);$t->timestamps();});}public function down():void{Schema::dropIfExists('review_cycles');}};
