@@ -114,7 +114,7 @@ Route::get('/clear-all', function () {
 // new routes for new theme
 Route::get('/', function() {
 	return redirect()->to('login');
-});
+})->name('home');
 Route::get('shop-new', [FrontController::class, 'product_list'])->name('shop-new');
 Route::get('theme/login', [FrontController::class, 'theme_login'])->name('theme-login');
 Route::get('theme/register', [FrontController::class, 'theme_register'])->name('theme-register');
