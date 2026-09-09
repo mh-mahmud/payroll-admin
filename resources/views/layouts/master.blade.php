@@ -254,7 +254,7 @@
 									$hasCurrentChild = collect((array) $submenu)->keys()->contains(function ($routeName) {
 										return !empty($routeName) && Route::has($routeName) && request()->routeIs($routeName);
 									});
-									$menuIsOpen = $hasCurrentChild || ($isOrganizationMenu && (request()->routeIs('organization.*') || request()->routeIs('branches', 'departments', 'designations', 'shifts', 'attendance-policies', 'document-types', 'holidays', 'announcements', 'award-types'))) || ($isEmployeeLifecycleMenu && request()->routeIs('awards*', 'promotion-*', 'transfers-*', 'warnings-*', 'resignations-*', 'termination-types-*', 'terminations-*', 'complaint-types-*', 'complaints-*', 'trips-*')) || ($isPerformanceMenu && request()->routeIs('review-cycles-*', 'employee-reviews-*', 'employee-goals-*', 'goal-types-*'));
+									$menuIsOpen = $hasCurrentChild || ($isOrganizationMenu && (request()->routeIs('organization.*') || request()->routeIs('branches', 'departments', 'designations', 'shifts', 'attendance-policies', 'document-types', 'holidays', 'announcements', 'award-types'))) || ($isEmployeeLifecycleMenu && request()->routeIs('awards*', 'promotion-*', 'transfers-*', 'warnings-*', 'resignations-*', 'termination-types-*', 'terminations-*', 'complaint-types-*', 'complaints-*', 'trips-*')) || ($isPerformanceMenu && request()->routeIs('review-cycles-*', 'employee-reviews-*', 'employee-goals-*', 'goal-types-*', 'indicator-categories-*', 'indicators-*'));
 								@endphp
 								@if(in_array($menuName, $blacklist))
 									@continue
@@ -296,7 +296,9 @@
 									<div class="menu-item"><a class="menu-link {{ request()->routeIs('employee-reviews-*') ? 'active' : '' }}" href="{{ route('employee-reviews-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Employee Reviews</span></a></div>
 									<div class="menu-item"><a class="menu-link {{ request()->routeIs('employee-goals-*') ? 'active' : '' }}" href="{{ route('employee-goals-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Employee Goals</span></a></div>
 									<div class="menu-item"><a class="menu-link {{ request()->routeIs('review-cycles-*') ? 'active' : '' }}" href="{{ route('review-cycles-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Review Cycles</span></a></div>
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('indicators-*') ? 'active' : '' }}" href="{{ route('indicators-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Indicators</span></a></div>
 									<div class="menu-item"><a class="menu-link {{ request()->routeIs('goal-types-*') ? 'active' : '' }}" href="{{ route('goal-types-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Goal Types</span></a></div>
+									<div class="menu-item"><a class="menu-link {{ request()->routeIs('indicator-categories-*') ? 'active' : '' }}" href="{{ route('indicator-categories-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Indicator Categories</span></a></div>
 									@endif
 									@if($isEmployeeLifecycleMenu)
 									<div class="menu-item">
@@ -326,7 +328,7 @@
 									@endif
 
 									@foreach($submenu as $key=>$val)
-									@if($isPerformanceMenu && in_array(strtolower(str_replace(['_', ' ', '-'], '', (string) $key)), ['reviewcycles', 'employeereviews', 'goaltypes']))
+									@if($isPerformanceMenu && in_array(strtolower(str_replace(['_', ' ', '-'], '', (string) $key)), ['reviewcycles', 'employeereviews', 'goaltypes', 'indicatorcategories', 'indicators']))
 										@continue
 									@endif
 									@if($isEmployeeLifecycleMenu && $key === 'awards')
@@ -431,7 +433,7 @@
 							</div>
 
 							@if(!$hasPerformanceMenu)
-			<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('review-cycles-*', 'employee-reviews-*', 'employee-goals-*', 'goal-types-*') ? 'here show' : '' }}">
+			<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('review-cycles-*', 'employee-reviews-*', 'employee-goals-*', 'goal-types-*', 'indicator-categories-*', 'indicators-*') ? 'here show' : '' }}">
 				<span class="menu-link">
 					<span class="menu-icon"><span class="svg-icon svg-icon-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span></span>
 					<span class="menu-title">Performance Management</span><span class="menu-arrow"></span>
@@ -440,7 +442,9 @@
 					<div class="menu-item"><a class="menu-link {{ request()->routeIs('employee-reviews-*') ? 'active' : '' }}" href="{{ route('employee-reviews-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Employee Reviews</span></a></div>
 					<div class="menu-item"><a class="menu-link {{ request()->routeIs('employee-goals-*') ? 'active' : '' }}" href="{{ route('employee-goals-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Employee Goals</span></a></div>
 					<div class="menu-item"><a class="menu-link {{ request()->routeIs('review-cycles-*') ? 'active' : '' }}" href="{{ route('review-cycles-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Review Cycles</span></a></div>
+					<div class="menu-item"><a class="menu-link {{ request()->routeIs('indicators-*') ? 'active' : '' }}" href="{{ route('indicators-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Indicators</span></a></div>
 					<div class="menu-item"><a class="menu-link {{ request()->routeIs('goal-types-*') ? 'active' : '' }}" href="{{ route('goal-types-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Goal Types</span></a></div>
+					<div class="menu-item"><a class="menu-link {{ request()->routeIs('indicator-categories-*') ? 'active' : '' }}" href="{{ route('indicator-categories-index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Indicator Categories</span></a></div>
 				</div>
 			</div>
 							@endif
