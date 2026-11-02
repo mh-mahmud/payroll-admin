@@ -698,7 +698,7 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
         'shifts' => 'shift'
     ])
     ->only([
-        'index',
+        'index' => 'shift-list.index',
         'store',
         'show',
         'update',

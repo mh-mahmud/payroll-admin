@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.1deb5ubuntu1
+-- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:3306
--- Generation Time: Aug 20, 2026 at 06:47 AM
--- Server version: 8.0.46-0ubuntu0.22.04.3
--- PHP Version: 8.3.33
+-- Host: 127.0.0.1:3306
+-- Generation Time: Nov 02, 2026 at 04:36 AM
+-- Server version: 8.0.31
+-- PHP Version: 8.2.0
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -27,7 +27,8 @@ SET time_zone = "+00:00";
 -- Table structure for table `agents`
 --
 
-CREATE TABLE `agents` (
+DROP TABLE IF EXISTS `agents`;
+CREATE TABLE IF NOT EXISTS `agents` (
   `agent_id` char(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `user_id` bigint UNSIGNED NOT NULL,
   `first_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -44,7 +45,9 @@ CREATE TABLE `agents` (
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `performance` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`agent_id`),
+  KEY `agents_user_id_foreign` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -60,8 +63,9 @@ INSERT INTO `agents` (`agent_id`, `user_id`, `first_name`, `last_name`, `phone_n
 -- Table structure for table `announcements`
 --
 
-CREATE TABLE `announcements` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `announcements`;
+CREATE TABLE IF NOT EXISTS `announcements` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -73,8 +77,25 @@ CREATE TABLE `announcements` (
   `end_date` date DEFAULT NULL,
   `branch_id` bigint UNSIGNED DEFAULT NULL,
   `department_id` bigint UNSIGNED DEFAULT NULL,
-  `audience` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `audience` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `short_description` text COLLATE utf8mb4_unicode_ci,
+  `content` longtext COLLATE utf8mb4_unicode_ci,
+  `attachment` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_featured` tinyint(1) NOT NULL DEFAULT '0',
+  `is_high_priority` tinyint(1) NOT NULL DEFAULT '0',
+  `is_company_wide` tinyint(1) NOT NULL DEFAULT '1',
+  `branch_ids` json DEFAULT NULL,
+  `department_ids` json DEFAULT NULL,
+  `views_count` int UNSIGNED NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `announcements`
+--
+
+INSERT INTO `announcements` (`id`, `name`, `code`, `description`, `status`, `created_at`, `updated_at`, `category`, `start_date`, `end_date`, `branch_id`, `department_id`, `audience`, `short_description`, `content`, `attachment`, `is_featured`, `is_high_priority`, `is_company_wide`, `branch_ids`, `department_ids`, `views_count`) VALUES
+(1, 'Company annual picnic', NULL, NULL, 1, '2026-09-01 12:22:05', '2026-09-01 12:22:05', 'Benefits', '2026-09-01', '2026-09-02', NULL, NULL, 'Company-wide', 'This is a picnic event', '<a href=\"https://demo.workdo.io/hrm/hr/complaints\" rel=\"noopener noreferrer\">Employee Lifecycle</a>', NULL, 0, 0, 1, '[]', '[]', 1);
 
 -- --------------------------------------------------------
 
@@ -82,23 +103,86 @@ CREATE TABLE `announcements` (
 -- Table structure for table `attendance_policies`
 --
 
-CREATE TABLE `attendance_policies` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `attendance_policies`;
+CREATE TABLE IF NOT EXISTS `attendance_policies` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `late_arrival_grace` int UNSIGNED NOT NULL DEFAULT '0',
+  `early_departure_grace` int UNSIGNED NOT NULL DEFAULT '0',
+  `overtime_rate` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `status` enum('active','inactive') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `attendance_policies_status_index` (`status`),
+  KEY `attendance_policies_name_index` (`name`)
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `attendance_policies`
+--
+
+INSERT INTO `attendance_policies` (`id`, `name`, `description`, `late_arrival_grace`, `early_departure_grace`, `overtime_rate`, `status`, `created_at`, `updated_at`) VALUES
+(2, 'Flexible Attendance Policy', 'Flexible attendance policy with extended grace periods for remote and flexible workers', 30, 30, '175.00', 'active', '2026-09-04 14:16:34', '2026-09-04 17:45:56'),
+(3, 'Strict Attendance Policy', 'Strict attendance policy with minimal grace periods for critical operations', 5, 5, '200.00', 'active', '2026-09-04 18:16:11', '2026-09-04 18:16:11');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `attendance_policies_old`
+--
+
+DROP TABLE IF EXISTS `attendance_policies_old`;
+CREATE TABLE IF NOT EXISTS `attendance_policies_old` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `late_after_minutes` int UNSIGNED NOT NULL DEFAULT '0',
   `working_hours` decimal(4,2) NOT NULL DEFAULT '8.00',
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `attendance_policies`
+-- Dumping data for table `attendance_policies_old`
 --
 
-INSERT INTO `attendance_policies` (`id`, `name`, `code`, `late_after_minutes`, `working_hours`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `attendance_policies_old` (`id`, `name`, `code`, `late_after_minutes`, `working_hours`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'Standard Policy', 'STD', 0, '8.00', 1, '2026-08-12 07:17:24', '2026-08-12 07:17:24');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `awards`
+--
+
+DROP TABLE IF EXISTS `awards`;
+CREATE TABLE IF NOT EXISTS `awards` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `employee_id` bigint UNSIGNED NOT NULL,
+  `award_type_id` bigint UNSIGNED NOT NULL,
+  `award_date` date NOT NULL,
+  `gift` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `certificate_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `photo_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `awards_employee_id_foreign` (`employee_id`),
+  KEY `awards_award_type_id_award_date_index` (`award_type_id`,`award_date`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `awards`
+--
+
+INSERT INTO `awards` (`id`, `employee_id`, `award_type_id`, `award_date`, `gift`, `description`, `certificate_path`, `photo_path`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, '2026-08-01', 'Voucher', 'He is the first winner', NULL, NULL, '2026-09-02 03:22:47', '2026-09-02 03:22:47'),
+(2, 1, 2, '2026-05-31', 'Cash', 'This is a', NULL, NULL, '2026-09-03 09:37:28', '2026-09-03 09:37:28');
 
 -- --------------------------------------------------------
 
@@ -106,15 +190,25 @@ INSERT INTO `attendance_policies` (`id`, `name`, `code`, `late_after_minutes`, `
 -- Table structure for table `award_types`
 --
 
-CREATE TABLE `award_types` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `award_types`;
+CREATE TABLE IF NOT EXISTS `award_types` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `award_types`
+--
+
+INSERT INTO `award_types` (`id`, `name`, `code`, `status`, `created_at`, `updated_at`, `description`) VALUES
+(1, 'Employee of the Month', NULL, 1, '2026-08-31 00:53:16', '2026-08-31 00:53:16', 'Outstanding performance and dedication award'),
+(2, 'Employee of the Year', NULL, 1, '2026-08-31 00:53:42', '2026-08-31 00:54:23', 'Annual recognition for exceptional contributions, consistent excellence, and outstanding dedication throughout the year. Done it all.');
 
 -- --------------------------------------------------------
 
@@ -122,8 +216,9 @@ CREATE TABLE `award_types` (
 -- Table structure for table `bank_info`
 --
 
-CREATE TABLE `bank_info` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `bank_info`;
+CREATE TABLE IF NOT EXISTS `bank_info` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `lead_id` bigint UNSIGNED NOT NULL,
   `form_id` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_by` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -134,8 +229,9 @@ CREATE TABLE `bank_info` (
   `start_date` date DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `total_amount` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `total_amount` int DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `bank_info`
@@ -157,8 +253,9 @@ INSERT INTO `bank_info` (`id`, `lead_id`, `form_id`, `created_by`, `name`, `loca
 -- Table structure for table `billing_address`
 --
 
-CREATE TABLE `billing_address` (
-  `id` int NOT NULL,
+DROP TABLE IF EXISTS `billing_address`;
+CREATE TABLE IF NOT EXISTS `billing_address` (
+  `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   `session_id` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `first_name` varchar(70) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
@@ -173,8 +270,9 @@ CREATE TABLE `billing_address` (
   `shipping_address_2` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT '1'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 --
 -- Dumping data for table `billing_address`
@@ -208,16 +306,18 @@ INSERT INTO `billing_address` (`id`, `user_id`, `session_id`, `first_name`, `las
 -- Table structure for table `bloggers_category`
 --
 
-CREATE TABLE `bloggers_category` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `bloggers_category`;
+CREATE TABLE IF NOT EXISTS `bloggers_category` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `parent_id` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `category_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `category_description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `category_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` tinyint NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `bloggers_category`
@@ -235,16 +335,18 @@ INSERT INTO `bloggers_category` (`id`, `parent_id`, `category_name`, `category_d
 -- Table structure for table `blogs`
 --
 
-CREATE TABLE `blogs` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `blogs`;
+CREATE TABLE IF NOT EXISTS `blogs` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `blog_category_id` int DEFAULT NULL,
   `blog_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `blog_description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `blog_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` tinyint NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -252,25 +354,34 @@ CREATE TABLE `blogs` (
 -- Table structure for table `branches`
 --
 
-CREATE TABLE `branches` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `branches`;
+CREATE TABLE IF NOT EXISTS `branches` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `state_id` int DEFAULT NULL,
   `city_id` int DEFAULT NULL,
   `branch_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `branch_code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `address` text COLLATE utf8mb4_unicode_ci,
+  `city` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `state` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `country` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `postal_code` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` tinyint NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `email` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `contact` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `contact` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `branches`
 --
 
-INSERT INTO `branches` (`id`, `state_id`, `city_id`, `branch_name`, `branch_code`, `status`, `created_at`, `updated_at`, `email`, `contact`) VALUES
-(1, NULL, NULL, 'Main Branch', 'MAIN', 1, '2026-08-12 07:17:24', '2026-08-12 07:17:24', NULL, NULL);
+INSERT INTO `branches` (`id`, `state_id`, `city_id`, `branch_name`, `branch_code`, `address`, `city`, `state`, `country`, `postal_code`, `status`, `created_at`, `updated_at`, `email`, `contact`) VALUES
+(1, NULL, NULL, 'Main Branch', 'MAIN', NULL, NULL, NULL, NULL, NULL, 1, '2026-08-12 07:17:24', '2026-08-12 07:17:24', NULL, NULL),
+(2, NULL, NULL, 'Dhaka Branch', 'BR-00002', 'Mirpur 12, Dhaka', NULL, NULL, 'Bangladesh', '1302', 1, '2026-08-31 00:31:18', '2026-08-31 00:33:24', 'dbl@gmail.com', '01717898989'),
+(3, NULL, NULL, 'Chittagong Branch', 'BR-00003', NULL, NULL, NULL, NULL, NULL, 1, '2026-09-04 05:10:07', '2026-09-04 17:36:51', NULL, '01919090989');
 
 -- --------------------------------------------------------
 
@@ -278,15 +389,17 @@ INSERT INTO `branches` (`id`, `state_id`, `city_id`, `branch_name`, `branch_code
 -- Table structure for table `brands`
 --
 
-CREATE TABLE `brands` (
-  `id` int NOT NULL,
+DROP TABLE IF EXISTS `brands`;
+CREATE TABLE IF NOT EXISTS `brands` (
+  `id` int NOT NULL AUTO_INCREMENT,
   `brand_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `brand_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `brand_description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` tinyint NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `brands`
@@ -301,8 +414,9 @@ INSERT INTO `brands` (`id`, `brand_name`, `brand_image`, `brand_description`, `s
 -- Table structure for table `campaigns`
 --
 
-CREATE TABLE `campaigns` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `campaigns`;
+CREATE TABLE IF NOT EXISTS `campaigns` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `form_id` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `email_template_id` int DEFAULT NULL,
   `sms_template_id` int DEFAULT NULL,
@@ -318,8 +432,10 @@ CREATE TABLE `campaigns` (
   `promotion_id` bigint UNSIGNED DEFAULT NULL,
   `created_by` int UNSIGNED DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `campaigns_promotion_id_index` (`promotion_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `campaigns`
@@ -334,8 +450,9 @@ INSERT INTO `campaigns` (`id`, `form_id`, `email_template_id`, `sms_template_id`
 -- Table structure for table `campaign_data`
 --
 
-CREATE TABLE `campaign_data` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `campaign_data`;
+CREATE TABLE IF NOT EXISTS `campaign_data` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `campaign_id` bigint DEFAULT NULL,
   `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `email` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -343,7 +460,9 @@ CREATE TABLE `campaign_data` (
   `sms_template_id` int DEFAULT NULL,
   `status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `campaign_data_email_unique` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -352,16 +471,18 @@ CREATE TABLE `campaign_data` (
 -- Table structure for table `careers`
 --
 
-CREATE TABLE `careers` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `careers`;
+CREATE TABLE IF NOT EXISTS `careers` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `career_category_id` int DEFAULT NULL,
   `job_title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `job_description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `job_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` tinyint NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `careers`
@@ -376,8 +497,9 @@ INSERT INTO `careers` (`id`, `career_category_id`, `job_title`, `job_description
 -- Table structure for table `carts`
 --
 
-CREATE TABLE `carts` (
-  `id` int NOT NULL,
+DROP TABLE IF EXISTS `carts`;
+CREATE TABLE IF NOT EXISTS `carts` (
+  `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   `session_id` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `product_id` int NOT NULL,
@@ -391,8 +513,9 @@ CREATE TABLE `carts` (
   `discount` decimal(10,2) DEFAULT NULL,
   `final_price` decimal(10,2) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=216 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 --
 -- Dumping data for table `carts`
@@ -522,8 +645,9 @@ INSERT INTO `carts` (`id`, `user_id`, `session_id`, `product_id`, `product_image
 -- Table structure for table `categories`
 --
 
-CREATE TABLE `categories` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `categories`;
+CREATE TABLE IF NOT EXISTS `categories` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `parent_id` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `category_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `category_slug` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -536,8 +660,10 @@ CREATE TABLE `categories` (
   `is_slider_bottom` tinyint(1) NOT NULL DEFAULT '0',
   `is_feature` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `categories_category_slug_unique` (`category_slug`)
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `categories`
@@ -555,14 +681,34 @@ INSERT INTO `categories` (`id`, `parent_id`, `category_name`, `category_slug`, `
 -- Table structure for table `city`
 --
 
-CREATE TABLE `city` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `city`;
+CREATE TABLE IF NOT EXISTS `city` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `country_id` int NOT NULL,
   `state_id` int NOT NULL,
   `city_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `complaint_types`
+--
+
+DROP TABLE IF EXISTS `complaint_types`;
+CREATE TABLE IF NOT EXISTS `complaint_types` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `complaint_types_name_unique` (`name`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -570,13 +716,15 @@ CREATE TABLE `city` (
 -- Table structure for table `countries`
 --
 
-CREATE TABLE `countries` (
-  `id` bigint NOT NULL,
+DROP TABLE IF EXISTS `countries`;
+CREATE TABLE IF NOT EXISTS `countries` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status` tinyint NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `countries`
@@ -598,11 +746,13 @@ INSERT INTO `countries` (`id`, `name`, `status`, `created_at`, `updated_at`) VAL
 -- Table structure for table `country`
 --
 
-CREATE TABLE `country` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `country`;
+CREATE TABLE IF NOT EXISTS `country` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `country_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -611,14 +761,16 @@ CREATE TABLE `country` (
 -- Table structure for table `currencies`
 --
 
-CREATE TABLE `currencies` (
-  `id` bigint NOT NULL,
+DROP TABLE IF EXISTS `currencies`;
+CREATE TABLE IF NOT EXISTS `currencies` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `symbol` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status` tinyint NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `currencies`
@@ -635,7 +787,8 @@ INSERT INTO `currencies` (`id`, `name`, `symbol`, `status`, `created_at`, `updat
 -- Table structure for table `customers`
 --
 
-CREATE TABLE `customers` (
+DROP TABLE IF EXISTS `customers`;
+CREATE TABLE IF NOT EXISTS `customers` (
   `id` bigint UNSIGNED NOT NULL,
   `lead_id` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `customer_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -655,15 +808,18 @@ CREATE TABLE `customers` (
 -- Table structure for table `customers_old`
 --
 
-CREATE TABLE `customers_old` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `customers_old`;
+CREATE TABLE IF NOT EXISTS `customers_old` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `lead_id` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `customer_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `customer_group` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `customer_notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `customer_id` (`customer_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `customers_old`
@@ -679,8 +835,9 @@ INSERT INTO `customers_old` (`id`, `lead_id`, `customer_id`, `customer_group`, `
 -- Table structure for table `customer_info`
 --
 
-CREATE TABLE `customer_info` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `customer_info`;
+CREATE TABLE IF NOT EXISTS `customer_info` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `lead_id` bigint UNSIGNED NOT NULL,
   `form_id` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_by` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -690,8 +847,9 @@ CREATE TABLE `customer_info` (
   `total_balance` char(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `image_upload_file` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `customer_info`
@@ -711,22 +869,26 @@ INSERT INTO `customer_info` (`id`, `lead_id`, `form_id`, `created_by`, `customer
 -- Table structure for table `departments`
 --
 
-CREATE TABLE `departments` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `departments`;
+CREATE TABLE IF NOT EXISTS `departments` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `branch_id` bigint UNSIGNED DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `departments`
 --
 
-INSERT INTO `departments` (`id`, `name`, `code`, `branch_id`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'General', 'GEN', NULL, 1, '2026-08-12 07:17:24', '2026-08-12 07:17:24');
+INSERT INTO `departments` (`id`, `name`, `code`, `branch_id`, `description`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'General', 'GEN', 1, NULL, 1, '2026-08-12 07:17:24', '2026-08-31 00:35:00'),
+(2, 'HR department', 'DEPT-00002', 1, 'New added', 1, '2026-08-31 00:35:23', '2026-09-04 17:38:02');
 
 -- --------------------------------------------------------
 
@@ -734,22 +896,26 @@ INSERT INTO `departments` (`id`, `name`, `code`, `branch_id`, `status`, `created
 -- Table structure for table `designations`
 --
 
-CREATE TABLE `designations` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `designations`;
+CREATE TABLE IF NOT EXISTS `designations` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `department_id` bigint UNSIGNED DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `designations`
 --
 
-INSERT INTO `designations` (`id`, `name`, `code`, `department_id`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Employee', 'EMP', NULL, 1, '2026-08-12 07:17:24', '2026-08-12 07:17:24');
+INSERT INTO `designations` (`id`, `name`, `code`, `department_id`, `description`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Employee', 'EMP', NULL, NULL, 1, '2026-08-12 07:17:24', '2026-08-12 07:17:24'),
+(2, 'CEO', NULL, 1, 'Chief Executive Officers', 1, '2026-08-31 00:39:58', '2026-08-31 00:40:48');
 
 -- --------------------------------------------------------
 
@@ -757,15 +923,103 @@ INSERT INTO `designations` (`id`, `name`, `code`, `department_id`, `status`, `cr
 -- Table structure for table `developer department`
 --
 
-CREATE TABLE `developer department` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `developer department`;
+CREATE TABLE IF NOT EXISTS `developer department` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `lead_id` bigint UNSIGNED NOT NULL,
   `form_id` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `web design` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `machine learning` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `developer department_web design_unique` (`web design`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `device_attendence`
+--
+
+DROP TABLE IF EXISTS `device_attendence`;
+CREATE TABLE IF NOT EXISTS `device_attendence` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `payroll_id` int UNSIGNED NOT NULL,
+  `uid` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `state` tinyint DEFAULT NULL,
+  `finger_date_time` datetime DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `device_attendence`
+--
+
+INSERT INTO `device_attendence` (`id`, `payroll_id`, `uid`, `state`, `finger_date_time`, `created_at`, `updated_at`) VALUES
+(1, 10, '686', 1, '2026-08-10 10:54:03', '2026-08-10 11:24:38', '2026-08-10 11:24:38'),
+(2, 4, '687', 1, '2026-08-10 10:54:09', '2026-08-10 11:24:38', '2026-08-10 11:24:38'),
+(3, 8, '688', 1, '2026-08-10 11:04:25', '2026-08-10 11:24:38', '2026-08-10 11:24:38'),
+(4, 13, '689', 1, '2026-08-10 11:06:48', '2026-08-10 11:24:38', '2026-08-10 11:24:38'),
+(5, 2, '690', 1, '2026-08-10 11:12:00', '2026-08-10 11:24:38', '2026-08-10 11:24:38'),
+(6, 14, '691', 1, '2026-08-10 11:12:20', '2026-08-10 11:24:38', '2026-08-10 11:24:38'),
+(7, 9, '692', 1, '2026-08-10 11:14:37', '2026-08-10 11:24:38', '2026-08-10 11:24:38'),
+(8, 9, '693', 1, '2026-08-10 11:15:07', '2026-08-10 11:24:38', '2026-08-10 11:24:38'),
+(9, 6, '694', 1, '2026-08-10 11:20:38', '2026-08-10 11:24:38', '2026-08-10 11:24:38'),
+(10, 12, '695', 1, '2026-08-10 12:08:07', '2026-08-10 11:24:38', '2026-08-10 11:24:38'),
+(11, 12, '696', 1, '2026-08-10 12:08:08', '2026-08-10 11:24:38', '2026-08-10 11:24:38'),
+(12, 7, '697', 1, '2026-08-10 14:17:23', '2026-08-10 11:24:38', '2026-08-10 11:24:38'),
+(13, 14, '954', 1, '2026-09-06 11:08:02', '2026-09-06 08:23:46', '2026-09-06 08:23:46'),
+(14, 6, '955', 1, '2026-09-06 11:35:45', '2026-09-06 08:23:46', '2026-09-06 08:23:46'),
+(15, 8, '956', 1, '2026-09-06 11:47:50', '2026-09-06 08:23:46', '2026-09-06 08:23:46'),
+(16, 8, '957', 1, '2026-09-06 11:47:58', '2026-09-06 08:23:46', '2026-09-06 08:23:46'),
+(17, 6, '958', 1, '2026-09-06 11:48:15', '2026-09-06 08:23:46', '2026-09-06 08:23:46'),
+(18, 12, '959', 1, '2026-09-06 12:16:48', '2026-09-06 08:23:46', '2026-09-06 08:23:46'),
+(19, 6, '960', 1, '2026-09-06 14:21:30', '2026-09-06 08:23:46', '2026-09-06 08:23:46');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `device_user`
+--
+
+DROP TABLE IF EXISTS `device_user`;
+CREATE TABLE IF NOT EXISTS `device_user` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `payroll_id` int UNSIGNED NOT NULL,
+  `uid` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `employee_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `device_role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `password` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('active','inactive') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `device_user`
+--
+
+INSERT INTO `device_user` (`id`, `payroll_id`, `uid`, `employee_name`, `device_role`, `password`, `status`, `created_at`, `updated_at`) VALUES
+(1, 1, '1', 'Shuvo', '14', '369932', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(2, 2, '2', 'Srabonti', '0', '', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(3, 3, '3', 'Upoma', '14', '1997', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(4, 4, '4', 'Anwar Samiya', '0', '', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(5, 5, '5', 'Sneha', '0', '', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(6, 6, '6', 'UZZAL', '0', '', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(7, 8, '8', 'Ismail Hossain', '0', '', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(8, 9, '9', 'Sinthia', '0', '', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(9, 10, '10', 'Jayed', '0', '', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(10, 11, '11', 'Jui', '0', '', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(11, 12, '12', 'Dola', '0', '', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(12, 13, '13', 'Wahida Anwar Suha', '0', '', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(13, 14, '14', 'Snigdha Akter', '0', '', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(14, 7, '15', 'Parves Fox', '0', '1234', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(15, 15, '16', '16', '0', '', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45'),
+(16, 32, '17', 'Upoma Upoma', '0', '', 'active', '2026-08-10 11:00:45', '2026-08-10 11:00:45');
 
 -- --------------------------------------------------------
 
@@ -773,25 +1027,28 @@ CREATE TABLE `developer department` (
 -- Table structure for table `document_types`
 --
 
-CREATE TABLE `document_types` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `document_types`;
+CREATE TABLE IF NOT EXISTS `document_types` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `is_required` tinyint(1) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `is_required` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `document_types`
 --
 
 INSERT INTO `document_types` (`id`, `name`, `code`, `status`, `created_at`, `updated_at`, `description`, `is_required`) VALUES
-(1, 'Identity Proof', 'ID', 1, '2026-08-12 07:17:24', '2026-08-12 07:17:24', NULL, 0),
-(2, 'Address Proof', 'ADDR', 1, '2026-08-12 07:17:24', '2026-08-12 07:17:24', NULL, 0),
-(3, 'Educational Certificate', 'EDU', 1, '2026-08-12 07:17:24', '2026-08-12 07:17:24', NULL, 0);
+(1, 'Identity Proof', 'ID', 1, '2026-08-12 07:17:24', '2026-08-31 00:55:18', 'A valid government-issued identity document, such as a passport, driver’s license, or national ID, used to verify identity for official and legal purposes, ensuring authenticity and compliance', 1),
+(2, 'Address Proof', 'ADDR', 1, '2026-08-12 07:17:24', '2026-08-31 00:55:31', 'Address verification proof', 0),
+(3, 'Educational Certificate', 'EDU', 1, '2026-08-12 07:17:24', '2026-08-31 00:56:14', 'Academic certificates, degrees, diplomas, and transcripts', 1),
+(4, 'Experience Letters', NULL, 1, '2026-08-31 00:56:39', '2026-08-31 00:56:39', 'Documents from previous employers confirming work experience, roles, and performance, along with recommendation letters supporting professional credibility', 0);
 
 -- --------------------------------------------------------
 
@@ -799,8 +1056,9 @@ INSERT INTO `document_types` (`id`, `name`, `code`, `status`, `created_at`, `upd
 -- Table structure for table `email_log`
 --
 
-CREATE TABLE `email_log` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `email_log`;
+CREATE TABLE IF NOT EXISTS `email_log` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `campaign_id` bigint UNSIGNED DEFAULT NULL,
   `lead_id` bigint UNSIGNED DEFAULT NULL,
   `customer_id` bigint UNSIGNED DEFAULT NULL,
@@ -813,7 +1071,8 @@ CREATE TABLE `email_log` (
   `delivery_time` datetime DEFAULT NULL,
   `send_status` tinyint DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -822,8 +1081,9 @@ CREATE TABLE `email_log` (
 -- Table structure for table `email_queue`
 --
 
-CREATE TABLE `email_queue` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `email_queue`;
+CREATE TABLE IF NOT EXISTS `email_queue` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `campaign_id` bigint DEFAULT NULL,
   `lead_id` bigint DEFAULT NULL,
   `meeting_id` bigint DEFAULT NULL,
@@ -839,8 +1099,9 @@ CREATE TABLE `email_queue` (
   `status` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `user_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=299 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -848,16 +1109,18 @@ CREATE TABLE `email_queue` (
 -- Table structure for table `email_templates`
 --
 
-CREATE TABLE `email_templates` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `email_templates`;
+CREATE TABLE IF NOT EXISTS `email_templates` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `email_subject` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `email_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `status` tinyint DEFAULT NULL,
   `created_by` bigint DEFAULT NULL,
   `updated_by` bigint DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `email_templates`
@@ -876,15 +1139,16 @@ INSERT INTO `email_templates` (`id`, `email_subject`, `email_content`, `status`,
 -- Table structure for table `employees`
 --
 
-CREATE TABLE `employees` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `employees`;
+CREATE TABLE IF NOT EXISTS `employees` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `employee_code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `phone` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `branch` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `department` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `designation` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `branch` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `department` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `designation` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `date_of_joining` date NOT NULL,
   `employment_status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Active',
   `login_status` tinyint(1) NOT NULL DEFAULT '1',
@@ -916,8 +1180,54 @@ CREATE TABLE `employees` (
   `bank_identifier_code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `bank_branch` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `tax_id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `base_salary` decimal(14,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `base_salary` decimal(14,2) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `employees_employee_code_unique` (`employee_code`),
+  UNIQUE KEY `employees_email_unique` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `employees`
+--
+
+INSERT INTO `employees` (`id`, `employee_code`, `name`, `email`, `phone`, `branch`, `department`, `designation`, `date_of_joining`, `employment_status`, `login_status`, `created_at`, `updated_at`, `biometric_code`, `password`, `date_of_birth`, `gender`, `profile_image`, `branch_id`, `department_id`, `designation_id`, `shift_id`, `attendance_policy_id`, `employment_type`, `address_line_1`, `address_line_2`, `city`, `state`, `country`, `postal_code`, `emergency_contact_name`, `emergency_contact_relationship`, `emergency_contact_phone`, `bank_name`, `account_holder_name`, `account_number`, `bank_identifier_code`, `bank_branch`, `tax_id`, `base_salary`) VALUES
+(1, 'EMP0000001', 'Raju', 'super7@gmail.com', '+8801718516120', NULL, NULL, NULL, '2026-08-01', 'Active', 1, '2026-08-26 19:28:05', '2026-09-03 10:30:29', '56435', '$2y$12$.jA1FkxQNePXZVyfMlngbuHtoTJB6J0G.jlOOmQMn.Boeo38aBaWm', '2000-01-01', 'Male', 'employees/profiles/yZgYkBTd5xNXNgjpZMboeH8MqUSgJXXyg3cqFPcG.jpg', 1, 1, 1, 1, NULL, 'Full-time', 'Mirpur 12', NULL, 'Dhaka', 'Dhaka', 'Bangladesh', '3500', '01717761611', 'brother', '01919898989', 'Estern Bank', 'Raju Ahmed', '10123490878', '3210', 'Mirpur', NULL, '19500.00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employee_complaints`
+--
+
+DROP TABLE IF EXISTS `employee_complaints`;
+CREATE TABLE IF NOT EXISTS `employee_complaints` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `complainant_id` bigint UNSIGNED DEFAULT NULL,
+  `against_id` bigint UNSIGNED DEFAULT NULL,
+  `complaint_type_id` bigint UNSIGNED NOT NULL,
+  `subject` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `complaint_date` date NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `document_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_anonymous` tinyint(1) NOT NULL DEFAULT '0',
+  `status` enum('Submitted','Under Investigation','Resolved','Dismissed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Submitted',
+  `assigned_to` bigint UNSIGNED DEFAULT NULL,
+  `resolution_deadline` date DEFAULT NULL,
+  `resolution_type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `investigation_notes` text COLLATE utf8mb4_unicode_ci,
+  `resolution_action` text COLLATE utf8mb4_unicode_ci,
+  `resolution_date` date DEFAULT NULL,
+  `follow_up_action` text COLLATE utf8mb4_unicode_ci,
+  `follow_up_date` date DEFAULT NULL,
+  `feedback` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `employee_complaints_complainant_id_foreign` (`complainant_id`),
+  KEY `employee_complaints_against_id_foreign` (`against_id`),
+  KEY `employee_complaints_complaint_type_id_foreign` (`complaint_type_id`),
+  KEY `employee_complaints_assigned_to_foreign` (`assigned_to`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -925,15 +1235,248 @@ CREATE TABLE `employees` (
 -- Table structure for table `employee_documents`
 --
 
-CREATE TABLE `employee_documents` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `employee_documents`;
+CREATE TABLE IF NOT EXISTS `employee_documents` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `employee_id` bigint UNSIGNED NOT NULL,
   `document_type_id` bigint UNSIGNED DEFAULT NULL,
   `file_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `expiry_date` date DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `employee_documents_employee_id_index` (`employee_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employee_goals`
+--
+
+DROP TABLE IF EXISTS `employee_goals`;
+CREATE TABLE IF NOT EXISTS `employee_goals` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `employee_id` bigint UNSIGNED NOT NULL,
+  `goal_type_id` bigint UNSIGNED NOT NULL,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `target` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `progress` tinyint UNSIGNED NOT NULL DEFAULT '0',
+  `status` enum('Not Started','In Progress','Completed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Not Started',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `employee_goals_employee_id_foreign` (`employee_id`),
+  KEY `employee_goals_goal_type_id_foreign` (`goal_type_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employee_promotions`
+--
+
+DROP TABLE IF EXISTS `employee_promotions`;
+CREATE TABLE IF NOT EXISTS `employee_promotions` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `employee_id` bigint UNSIGNED NOT NULL,
+  `previous_designation_id` bigint UNSIGNED DEFAULT NULL,
+  `new_designation_id` bigint UNSIGNED NOT NULL,
+  `promotion_date` date NOT NULL,
+  `effective_date` date DEFAULT NULL,
+  `reason` text COLLATE utf8mb4_unicode_ci,
+  `document_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('Pending','Approved','Rejected') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `employee_promotions_employee_id_foreign` (`employee_id`),
+  KEY `employee_promotions_previous_designation_id_foreign` (`previous_designation_id`),
+  KEY `employee_promotions_new_designation_id_foreign` (`new_designation_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `employee_promotions`
+--
+
+INSERT INTO `employee_promotions` (`id`, `employee_id`, `previous_designation_id`, `new_designation_id`, `promotion_date`, `effective_date`, `reason`, `document_path`, `status`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 1, '2026-09-03', '2026-10-01', 'Successfully completed advanced training and acquired new certifications', NULL, 'Approved', '2026-09-03 10:15:54', '2026-09-03 10:30:29');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employee_resignations`
+--
+
+DROP TABLE IF EXISTS `employee_resignations`;
+CREATE TABLE IF NOT EXISTS `employee_resignations` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `employee_id` bigint UNSIGNED NOT NULL,
+  `resignation_date` date NOT NULL,
+  `last_working_day` date DEFAULT NULL,
+  `notice_period` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reason` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `document_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('Pending','Approved','Rejected','Completed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending',
+  `exit_interview_conducted` tinyint(1) NOT NULL DEFAULT '0',
+  `exit_interview_date` date DEFAULT NULL,
+  `exit_feedback` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `employee_resignations_employee_id_foreign` (`employee_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `employee_resignations`
+--
+
+INSERT INTO `employee_resignations` (`id`, `employee_id`, `resignation_date`, `last_working_day`, `notice_period`, `reason`, `description`, `document_path`, `status`, `exit_interview_conducted`, `exit_interview_date`, `exit_feedback`, `created_at`, `updated_at`) VALUES
+(1, 1, '2026-09-01', '2026-09-15', '2 weeks', 'He is fired', NULL, NULL, 'Approved', 0, NULL, NULL, '2026-09-03 17:37:12', '2026-09-03 17:37:43');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employee_reviews`
+--
+
+DROP TABLE IF EXISTS `employee_reviews`;
+CREATE TABLE IF NOT EXISTS `employee_reviews` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `employee_id` bigint UNSIGNED NOT NULL,
+  `reviewer_id` bigint UNSIGNED NOT NULL,
+  `review_cycle_id` bigint UNSIGNED NOT NULL,
+  `review_date` date NOT NULL,
+  `status` enum('Scheduled','In Progress','Completed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Scheduled',
+  `rating` decimal(3,1) DEFAULT NULL,
+  `ratings` json DEFAULT NULL,
+  `comments` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `employee_reviews_employee_id_foreign` (`employee_id`),
+  KEY `employee_reviews_reviewer_id_foreign` (`reviewer_id`),
+  KEY `employee_reviews_review_cycle_id_foreign` (`review_cycle_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employee_terminations`
+--
+
+DROP TABLE IF EXISTS `employee_terminations`;
+CREATE TABLE IF NOT EXISTS `employee_terminations` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `employee_id` bigint UNSIGNED NOT NULL,
+  `termination_type_id` bigint UNSIGNED NOT NULL,
+  `notice_date` date NOT NULL,
+  `termination_date` date NOT NULL,
+  `notice_period` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reason` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `document_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('Planned','In Progress','Completed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Planned',
+  `exit_interview_conducted` tinyint(1) NOT NULL DEFAULT '0',
+  `exit_interview_date` date DEFAULT NULL,
+  `exit_feedback` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `employee_terminations_employee_id_foreign` (`employee_id`),
+  KEY `employee_terminations_termination_type_id_foreign` (`termination_type_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employee_transfers`
+--
+
+DROP TABLE IF EXISTS `employee_transfers`;
+CREATE TABLE IF NOT EXISTS `employee_transfers` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `employee_id` bigint UNSIGNED NOT NULL,
+  `from_branch_id` bigint UNSIGNED DEFAULT NULL,
+  `to_branch_id` bigint UNSIGNED NOT NULL,
+  `from_department_id` bigint UNSIGNED DEFAULT NULL,
+  `to_department_id` bigint UNSIGNED NOT NULL,
+  `from_designation_id` bigint UNSIGNED DEFAULT NULL,
+  `to_designation_id` bigint UNSIGNED DEFAULT NULL,
+  `transfer_date` date NOT NULL,
+  `effective_date` date NOT NULL,
+  `reason` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `document_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('Pending','Approved','Rejected') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending',
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `employee_transfers_employee_id_foreign` (`employee_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employee_trips`
+--
+
+DROP TABLE IF EXISTS `employee_trips`;
+CREATE TABLE IF NOT EXISTS `employee_trips` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `employee_id` bigint UNSIGNED NOT NULL,
+  `purpose` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `destination` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `expected_outcomes` text COLLATE utf8mb4_unicode_ci,
+  `document_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `advance_amount` decimal(14,2) DEFAULT NULL,
+  `advance_status` enum('Requested','Approved','Paid','Reconciled') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `expense_amount` decimal(14,2) DEFAULT NULL,
+  `expense_status` enum('Pending','Approved','Paid','Rejected') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('Planned','Ongoing','Completed','Cancelled') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Planned',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `employee_trips_employee_id_foreign` (`employee_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employee_warnings`
+--
+
+DROP TABLE IF EXISTS `employee_warnings`;
+CREATE TABLE IF NOT EXISTS `employee_warnings` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `employee_id` bigint UNSIGNED NOT NULL,
+  `warning_by` bigint UNSIGNED DEFAULT NULL,
+  `warning_type` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `severity` enum('Verbal','Written','Final') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `warning_date` date NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `document_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `expiry_date` date DEFAULT NULL,
+  `has_improvement_plan` tinyint(1) NOT NULL DEFAULT '0',
+  `improvement_goals` text COLLATE utf8mb4_unicode_ci,
+  `improvement_start_date` date DEFAULT NULL,
+  `improvement_end_date` date DEFAULT NULL,
+  `status` enum('Draft','Issued','Acknowledged','Expired') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Draft',
+  `acknowledgment_date` date DEFAULT NULL,
+  `employee_response` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `employee_warnings_employee_id_foreign` (`employee_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -941,15 +1484,18 @@ CREATE TABLE `employee_documents` (
 -- Table structure for table `failed_jobs`
 --
 
-CREATE TABLE `failed_jobs` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `failed_jobs`;
+CREATE TABLE IF NOT EXISTS `failed_jobs` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `uuid` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `connection` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `queue` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `exception` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `failed_jobs`
@@ -978,15 +1524,18 @@ INSERT INTO `failed_jobs` (`id`, `uuid`, `connection`, `queue`, `payload`, `exce
 -- Table structure for table `faqs`
 --
 
-CREATE TABLE `faqs` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `faqs`;
+CREATE TABLE IF NOT EXISTS `faqs` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `question` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `sort_order` int UNSIGNED NOT NULL DEFAULT '0',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `faqs_is_active_sort_order_index` (`is_active`,`sort_order`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `faqs`
@@ -1002,16 +1551,18 @@ INSERT INTO `faqs` (`id`, `question`, `answer`, `sort_order`, `is_active`, `crea
 -- Table structure for table `file_section`
 --
 
-CREATE TABLE `file_section` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `file_section`;
+CREATE TABLE IF NOT EXISTS `file_section` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `lead_id` bigint UNSIGNED NOT NULL,
   `form_id` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_by` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `file_title` char(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `upload_file` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `file_section`
@@ -1027,20 +1578,67 @@ INSERT INTO `file_section` (`id`, `lead_id`, `form_id`, `created_by`, `file_titl
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `goal_types`
+--
+
+DROP TABLE IF EXISTS `goal_types`;
+CREATE TABLE IF NOT EXISTS `goal_types` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `goal_types_name_unique` (`name`)
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `goal_types`
+--
+
+INSERT INTO `goal_types` (`id`, `name`, `description`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Leadership Goals', 'Leadership and management development', 1, '2026-09-10 02:24:39', '2026-09-10 02:24:39'),
+(2, 'Team Collaboration Goals', 'Objectives aimed at improving teamwork, communication, cross-functional collaboration, and team effectiveness', 1, '2026-09-10 02:24:56', '2026-09-10 02:24:56'),
+(3, 'Customer Service Goals', 'Customer service improvement goals', 1, '2026-09-10 02:25:13', '2026-09-10 02:25:13'),
+(4, 'Quality Improvement Goals', 'Goals aimed at enhancing work quality, reducing errors, improving processes, and maintaining high standards of excellence', 1, '2026-09-10 02:25:31', '2026-09-10 02:25:31'),
+(5, 'Sales and Revenue Goals', 'Sales and growth targets', 1, '2026-09-10 02:25:47', '2026-09-10 02:25:47'),
+(6, 'Project Goals', 'Project objectives and milestones', 1, '2026-09-10 02:26:02', '2026-09-10 02:26:02'),
+(7, 'Learning and Training Goals', 'Goals related to acquiring new knowledge, completing training programs, and developing competencies required for current or future roles', 1, '2026-09-10 02:26:21', '2026-09-10 02:26:21'),
+(8, 'Performance Goals', 'Performance and productivity goals', 1, '2026-09-10 02:27:02', '2026-09-10 02:27:02');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `holidays`
 --
 
-CREATE TABLE `holidays` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `holidays`;
+CREATE TABLE IF NOT EXISTS `holidays` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `holiday_date` date DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `category` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `branch_id` bigint UNSIGNED DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `branch_id` bigint UNSIGNED DEFAULT NULL,
+  `branch_ids` json DEFAULT NULL,
+  `is_recurring` tinyint(1) NOT NULL DEFAULT '0',
+  `is_paid` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `holidays`
+--
+
+INSERT INTO `holidays` (`id`, `name`, `code`, `holiday_date`, `start_date`, `end_date`, `status`, `created_at`, `updated_at`, `category`, `description`, `branch_id`, `branch_ids`, `is_recurring`, `is_paid`) VALUES
+(1, 'New Year', NULL, '2026-08-13', '2026-08-13', '2026-08-15', 1, '2026-08-31 00:42:03', '2026-08-31 00:43:55', 'National', 'This is new year time', 1, '[\"1\", \"2\"]', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -1048,8 +1646,9 @@ CREATE TABLE `holidays` (
 -- Table structure for table `home_page_settings`
 --
 
-CREATE TABLE `home_page_settings` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `home_page_settings`;
+CREATE TABLE IF NOT EXISTS `home_page_settings` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `banner_section_status` tinyint(1) NOT NULL DEFAULT '1',
   `banner_one_image` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `banner_one_url` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -1078,8 +1677,9 @@ CREATE TABLE `home_page_settings` (
   `featured_partner_logo` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `partner_logos` json DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `home_page_settings`
@@ -1091,11 +1691,47 @@ INSERT INTO `home_page_settings` (`id`, `banner_section_status`, `banner_one_ima
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `indicator_categories`
+--
+
+DROP TABLE IF EXISTS `indicator_categories`;
+CREATE TABLE IF NOT EXISTS `indicator_categories` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `indicator_categories_name_unique` (`name`),
+  KEY `indicator_categories_status_index` (`status`)
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `indicator_categories`
+--
+
+INSERT INTO `indicator_categories` (`id`, `name`, `description`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Job Performance', NULL, 1, '2026-09-10 02:22:28', '2026-09-10 02:22:28'),
+(2, 'Quality of Work', NULL, 1, '2026-09-10 02:22:42', '2026-09-10 02:22:42'),
+(3, 'Communication Skills', NULL, 1, '2026-09-10 02:22:52', '2026-09-10 02:22:52'),
+(4, 'Teamwork and Collaboration', NULL, 1, '2026-09-10 02:23:03', '2026-09-10 02:23:03'),
+(5, 'Leadership and Initiative', NULL, 1, '2026-09-10 02:23:13', '2026-09-10 02:23:13'),
+(6, 'Problem Solving', NULL, 1, '2026-09-10 02:23:23', '2026-09-10 02:23:23'),
+(7, 'Adaptability and Flexibility', NULL, 1, '2026-09-10 02:23:35', '2026-09-10 02:23:35'),
+(8, 'Time Management', NULL, 1, '2026-09-10 02:23:45', '2026-09-10 02:23:45'),
+(9, 'Customer Service', NULL, 1, '2026-09-10 02:23:56', '2026-09-10 02:23:56'),
+(10, 'Technical Competency', NULL, 1, '2026-09-10 02:24:06', '2026-09-10 02:24:06');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `invoices`
 --
 
-CREATE TABLE `invoices` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `invoices`;
+CREATE TABLE IF NOT EXISTS `invoices` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `customer_id` bigint UNSIGNED NOT NULL,
   `invoice_number` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `invoice_date` date NOT NULL,
@@ -1117,7 +1753,8 @@ CREATE TABLE `invoices` (
   `sale_agent_id` bigint UNSIGNED DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1126,8 +1763,9 @@ CREATE TABLE `invoices` (
 -- Table structure for table `invoice_custom_form`
 --
 
-CREATE TABLE `invoice_custom_form` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `invoice_custom_form`;
+CREATE TABLE IF NOT EXISTS `invoice_custom_form` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `invoice_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `field_details` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `footer_details` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -1135,7 +1773,8 @@ CREATE TABLE `invoice_custom_form` (
   `bank_details` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `issued_by` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1144,14 +1783,17 @@ CREATE TABLE `invoice_custom_form` (
 -- Table structure for table `jobs`
 --
 
-CREATE TABLE `jobs` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `jobs`;
+CREATE TABLE IF NOT EXISTS `jobs` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `queue` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `attempts` tinyint UNSIGNED NOT NULL,
   `reserved_at` int UNSIGNED DEFAULT NULL,
   `available_at` int UNSIGNED NOT NULL,
-  `created_at` int UNSIGNED NOT NULL
+  `created_at` int UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `jobs_queue_index` (`queue`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1160,19 +1802,23 @@ CREATE TABLE `jobs` (
 -- Table structure for table `leave_applications`
 --
 
-CREATE TABLE `leave_applications` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `leave_applications`;
+CREATE TABLE IF NOT EXISTS `leave_applications` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `employee_id` bigint UNSIGNED NOT NULL,
   `leave_type_id` bigint UNSIGNED NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
   `days_count` int NOT NULL,
-  `reason` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `attachment_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending',
+  `reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `attachment_path` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending',
   `applied_on` date NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `leave_applications_employee_id_foreign` (`employee_id`),
+  KEY `leave_applications_leave_type_id_foreign` (`leave_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1181,8 +1827,9 @@ CREATE TABLE `leave_applications` (
 -- Table structure for table `leave_balances`
 --
 
-CREATE TABLE `leave_balances` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `leave_balances`;
+CREATE TABLE IF NOT EXISTS `leave_balances` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `employee_id` bigint UNSIGNED NOT NULL,
   `leave_type_id` bigint UNSIGNED NOT NULL,
   `year` int NOT NULL,
@@ -1190,7 +1837,10 @@ CREATE TABLE `leave_balances` (
   `used_days` int NOT NULL DEFAULT '0',
   `available_days` int NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `leave_balances_employee_id_leave_type_id_year_unique` (`employee_id`,`leave_type_id`,`year`),
+  KEY `leave_balances_leave_type_id_foreign` (`leave_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1199,26 +1849,30 @@ CREATE TABLE `leave_balances` (
 -- Table structure for table `leave_policies`
 --
 
-CREATE TABLE `leave_policies` (
-  `id` bigint UNSIGNED NOT NULL,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
+DROP TABLE IF EXISTS `leave_policies`;
+CREATE TABLE IF NOT EXISTS `leave_policies` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `leave_type_id` bigint UNSIGNED NOT NULL,
   `carry_forward_limit` int NOT NULL DEFAULT '0',
   `min_days` int NOT NULL DEFAULT '1',
   `max_days` int NOT NULL DEFAULT '14',
   `requires_approval` tinyint(1) NOT NULL DEFAULT '1',
-  `status` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Active',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Active',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `leave_policies_leave_type_id_foreign` (`leave_type_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `leave_policies`
 --
 
 INSERT INTO `leave_policies` (`id`, `name`, `description`, `leave_type_id`, `carry_forward_limit`, `min_days`, `max_days`, `requires_approval`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Annual Leave Policy', 'Standard annual leave policy with yearly accrual and carry forward provisions', 1, 5, 1, 15, 1, 'Active', '2026-08-19 10:43:48', '2026-08-19 10:43:48');
+(1, 'Annual Leave Policy', 'Standard annual leave policy with yearly accrual and carry forward provisions', 1, 5, 1, 15, 1, 'Active', '2026-08-19 10:43:48', '2026-08-19 10:43:48'),
+(2, 'Urgent Leave', 'This is a urgent leave planning', 1, 1, 1, 3, 1, 'Active', '2026-09-01 12:24:26', '2026-09-01 12:24:26');
 
 -- --------------------------------------------------------
 
@@ -1226,24 +1880,28 @@ INSERT INTO `leave_policies` (`id`, `name`, `description`, `leave_type_id`, `car
 -- Table structure for table `leave_types`
 --
 
-CREATE TABLE `leave_types` (
-  `id` bigint UNSIGNED NOT NULL,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
+DROP TABLE IF EXISTS `leave_types`;
+CREATE TABLE IF NOT EXISTS `leave_types` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `max_days` int NOT NULL,
-  `color` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `color` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `is_paid` tinyint(1) NOT NULL DEFAULT '1',
-  `status` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Active',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Active',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `leave_types`
 --
 
 INSERT INTO `leave_types` (`id`, `name`, `description`, `max_days`, `color`, `is_paid`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Annual Leave', 'Yearly vacation leave for rest and recreation', 20, '#3BB2F6', 1, 'Active', '2026-08-19 10:39:14', '2026-08-19 10:39:14');
+(1, 'Annual Leave', 'Yearly vacation leave for rest and recreation', 20, '#3BB2F6', 1, 'Active', '2026-08-19 10:39:14', '2026-08-19 10:39:14'),
+(2, 'Sick Leave', NULL, 5, '#3BB2F6', 1, 'Active', '2026-09-01 12:25:22', '2026-09-01 12:25:22'),
+(3, 'Marriage Leave', NULL, 10, '#3BB2F6', 1, 'Active', '2026-09-01 12:25:44', '2026-09-01 12:25:44');
 
 -- --------------------------------------------------------
 
@@ -1251,8 +1909,9 @@ INSERT INTO `leave_types` (`id`, `name`, `description`, `max_days`, `color`, `is
 -- Table structure for table `logs`
 --
 
-CREATE TABLE `logs` (
-  `id` bigint NOT NULL,
+DROP TABLE IF EXISTS `logs`;
+CREATE TABLE IF NOT EXISTS `logs` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `user_id` bigint NOT NULL,
   `lead_id` int DEFAULT NULL,
   `module` varchar(180) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -1260,8 +1919,9 @@ CREATE TABLE `logs` (
   `log_message` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status` tinyint(1) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=340 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `logs`
@@ -1614,8 +2274,9 @@ INSERT INTO `logs` (`id`, `user_id`, `lead_id`, `module`, `sub_module`, `log_mes
 -- Table structure for table `meetings`
 --
 
-CREATE TABLE `meetings` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `meetings`;
+CREATE TABLE IF NOT EXISTS `meetings` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `lead_id` int UNSIGNED DEFAULT NULL,
   `recipients` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_by` int UNSIGNED DEFAULT NULL,
@@ -1630,7 +2291,8 @@ CREATE TABLE `meetings` (
   `meeting_feedback` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `rating` tinyint UNSIGNED DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1639,16 +2301,18 @@ CREATE TABLE `meetings` (
 -- Table structure for table `menus`
 --
 
-CREATE TABLE `menus` (
-  `id` int NOT NULL,
+DROP TABLE IF EXISTS `menus`;
+CREATE TABLE IF NOT EXISTS `menus` (
+  `id` int NOT NULL AUTO_INCREMENT,
   `parent_id` int DEFAULT NULL,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `sub_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `show_in_menu` tinyint(1) NOT NULL DEFAULT '1',
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=528 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `menus`
@@ -1943,7 +2607,153 @@ INSERT INTO `menus` (`id`, `parent_id`, `name`, `sub_name`, `show_in_menu`, `sta
 (378, 377, 'Leave Applications', 'leave-applications', 1, 1, '2026-08-19 10:22:04', '2026-08-19 10:22:04'),
 (379, 377, 'Leave Balances', 'leave-balances', 1, 1, '2026-08-19 10:22:04', '2026-08-19 10:22:04'),
 (380, 377, 'Leave Types', 'leave-types', 1, 1, '2026-08-19 10:22:04', '2026-08-19 10:22:04'),
-(381, 377, 'Leave Policies', 'leave-policies', 1, 1, '2026-08-19 10:22:04', '2026-08-19 10:22:04');
+(381, 377, 'Leave Policies', 'leave-policies', 1, 1, '2026-08-19 10:22:04', '2026-08-19 10:22:04'),
+(382, 224, 'Generated::gp8 My Mv8V5 Go Cz X K', 'generated::gp8MyMv8v5GoCzXK', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(383, 224, 'Generated::3 P X B Ub2P89 F Yt3 Je', 'generated::3PXBUb2p89FYt3Je', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(384, 224, 'Generated:: X Nb S Z El V0 Q R4Wr S H', 'generated::XNbSZElV0QR4wrSH', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(385, 224, 'Promotion Status', 'promotion-status', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(386, 224, 'Promotion Document', 'promotion-document', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(387, 224, 'Transfers Index', 'transfers-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(388, 224, 'Transfers Store', 'transfers-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(389, 224, 'Transfers Update', 'transfers-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(390, 224, 'Transfers Status', 'transfers-status', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(391, 224, 'Transfers Document', 'transfers-document', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(392, 224, 'Transfers Destroy', 'transfers-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(393, 224, 'Warnings Index', 'warnings-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(394, 224, 'Warnings Store', 'warnings-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(395, 224, 'Warnings Update', 'warnings-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(396, 224, 'Warnings Status', 'warnings-status', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(397, 224, 'Warnings Document', 'warnings-document', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(398, 224, 'Warnings Destroy', 'warnings-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(399, 224, 'Resignations Index', 'resignations-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(400, 224, 'Resignations Store', 'resignations-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(401, 224, 'Resignations Update', 'resignations-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(402, 224, 'Resignations Status', 'resignations-status', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(403, 224, 'Resignations Document', 'resignations-document', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(404, 224, 'Resignations Destroy', 'resignations-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(405, 224, 'Termination Types Index', 'termination-types-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(406, 224, 'Termination Types Store', 'termination-types-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(407, 224, 'Termination Types Update', 'termination-types-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(408, 224, 'Termination Types Toggle', 'termination-types-toggle', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(409, 224, 'Termination Types Destroy', 'termination-types-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(410, 224, 'Terminations Index', 'terminations-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(411, 224, 'Terminations Store', 'terminations-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(412, 224, 'Terminations Update', 'terminations-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(413, 224, 'Terminations Status', 'terminations-status', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(414, 224, 'Terminations Document', 'terminations-document', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(415, 224, 'Terminations Destroy', 'terminations-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(416, 224, 'Complaint Types Index', 'complaint-types-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(417, 224, 'Complaint Types Store', 'complaint-types-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(418, 224, 'Complaint Types Update', 'complaint-types-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(419, 224, 'Complaint Types Toggle', 'complaint-types-toggle', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(420, 224, 'Complaint Types Destroy', 'complaint-types-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(421, 224, 'Complaints Index', 'complaints-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(422, 224, 'Complaints Store', 'complaints-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(423, 224, 'Complaints Update', 'complaints-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(424, 224, 'Complaints Status', 'complaints-status', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(425, 224, 'Complaints Assign', 'complaints-assign', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(426, 224, 'Complaints Resolve', 'complaints-resolve', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(427, 224, 'Complaints Follow Up', 'complaints-follow-up', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(428, 224, 'Complaints Document', 'complaints-document', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(429, 224, 'Complaints Destroy', 'complaints-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(430, 224, 'Trips Index', 'trips-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(431, 224, 'Trips Store', 'trips-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(432, 224, 'Trips Update', 'trips-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(433, 224, 'Trips Status', 'trips-status', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(434, 224, 'Trips Finance', 'trips-finance', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(435, 224, 'Trips Document', 'trips-document', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(436, 224, 'Trips Destroy', 'trips-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(437, 224, 'Trip Expenses Index', 'trip-expenses-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(438, 224, 'Trip Expenses Store', 'trip-expenses-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(439, 224, 'Trip Expenses Update', 'trip-expenses-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(440, 224, 'Trip Expenses Status', 'trip-expenses-status', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(441, 224, 'Trip Expenses Receipt', 'trip-expenses-receipt', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(442, 224, 'Trip Expenses Destroy', 'trip-expenses-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(443, 224, 'Review Cycles Index', 'review-cycles-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(444, 224, 'Review Cycles Store', 'review-cycles-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(445, 224, 'Review Cycles Update', 'review-cycles-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(446, 224, 'Review Cycles Toggle', 'review-cycles-toggle', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(447, 224, 'Review Cycles Destroy', 'review-cycles-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(448, 224, 'Employee Reviews Index', 'employee-reviews-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(449, 224, 'Employee Reviews Create', 'employee-reviews-create', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(450, 224, 'Employee Reviews Store', 'employee-reviews-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(451, 224, 'Employee Reviews Show', 'employee-reviews-show', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(452, 224, 'Employee Reviews Conduct', 'employee-reviews-conduct', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(453, 224, 'Employee Reviews Conduct Save', 'employee-reviews-conduct-save', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(454, 224, 'Employee Reviews Status', 'employee-reviews-status', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(455, 224, 'Employee Reviews Destroy', 'employee-reviews-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(456, 224, 'Goal Types Index', 'goal-types-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(457, 224, 'Goal Types Store', 'goal-types-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(458, 224, 'Goal Types Update', 'goal-types-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(459, 224, 'Goal Types Destroy', 'goal-types-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(460, 224, 'Indicator Categories Index', 'indicator-categories-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(461, 224, 'Indicator Categories Store', 'indicator-categories-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(462, 224, 'Indicator Categories Update', 'indicator-categories-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(463, 224, 'Indicator Categories Toggle', 'indicator-categories-toggle', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(464, 224, 'Indicator Categories Destroy', 'indicator-categories-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(465, 224, 'Indicators Index', 'indicators-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(466, 224, 'Indicators Store', 'indicators-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(467, 224, 'Indicators Update', 'indicators-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(468, 224, 'Indicators Toggle', 'indicators-toggle', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(469, 224, 'Indicators Destroy', 'indicators-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(470, 224, 'Employee Goals Index', 'employee-goals-index', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(471, 224, 'Employee Goals Store', 'employee-goals-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(472, 224, 'Employee Goals Update', 'employee-goals-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(473, 224, 'Employee Goals Progress', 'employee-goals-progress', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(474, 224, 'Employee Goals Destroy', 'employee-goals-destroy', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(475, 224, 'Generated:: Eg Xdtyz Jxg V9 Md Nv', 'generated::EgXdtyzJxgV9MdNv', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(476, 224, 'Generated:: Y A J M R Jo0G Db57Yd E', 'generated::YAJMRJo0gDb57ydE', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(477, 224, 'Product List', 'product-list', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(478, 224, 'Add Product', 'add-product', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(479, 224, 'Employee Store', 'employee-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(480, 224, 'Employee Profile', 'employee-profile', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(481, 224, 'Employee Show', 'employee-show', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(482, 224, 'Employee Password', 'employee-password', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(483, 224, 'Employee Toggle Status', 'employee-toggle-status', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(484, 224, 'Employee Document Download', 'employee-document-download', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(485, 224, 'Employee Edit', 'employee-edit', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(486, 224, 'Employee Update', 'employee-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(487, 224, 'Employee Delete', 'employee-delete', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(488, 224, 'Leave Types Store', 'leave-types-store', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(489, 224, 'Leave Types Edit', 'leave-types-edit', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(490, 224, 'Leave Types Update', 'leave-types-update', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(491, 224, 'Leave Types Delete', 'leave-types-delete', 0, 1, '2026-10-30 09:54:34', '2026-10-30 09:54:34'),
+(492, 224, 'Leave Policies Store', 'leave-policies-store', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(493, 224, 'Leave Policies Update', 'leave-policies-update', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(494, 224, 'Leave Policies Toggle Status', 'leave-policies-toggle-status', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(495, 224, 'Leave Policies Delete', 'leave-policies-delete', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(496, 224, 'Leave Applications Approve', 'leave-applications-approve', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(497, 224, 'Leave Applications Reject', 'leave-applications-reject', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(498, 224, 'Leave Applications Delete', 'leave-applications-delete', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(499, 224, 'Leave Balances Sync', 'leave-balances-sync', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(500, 224, 'Awards', 'awards', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(501, 224, 'Awards Store', 'awards.store', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(502, 224, 'Awards Update', 'awards.update', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(503, 224, 'Awards Destroy', 'awards.destroy', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(504, 224, 'Shifts Index', 'shifts.index', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(505, 224, 'Attendance Policies Index', 'attendance-policies.index', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(506, 224, 'Holiday Calendar', 'holiday-calendar', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(507, 224, 'Holiday Export Pdf', 'holiday-export-pdf', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(508, 224, 'Holiday Export Ical', 'holiday-export-ical', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(509, 224, 'Announcement Target Departments', 'announcement-target-departments', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(510, 224, 'Announcement Details', 'announcement-details', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(511, 224, 'Announcement Statistics', 'announcement-statistics', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(512, 224, 'Organization Index', 'organization.index', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(513, 224, 'Organization Create', 'organization.create', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(514, 224, 'Organization Store', 'organization.store', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(515, 224, 'Organization Edit', 'organization.edit', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(516, 224, 'Organization Update', 'organization.update', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(517, 224, 'Organization Destroy', 'organization.destroy', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(518, 224, 'Organization Toggle Status', 'organization.toggle-status', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(519, 224, 'Generated:: Qf Bq1E5 M7Zw2 Dadg', 'generated::QfBq1e5M7zw2Dadg', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(520, 224, 'Attendance Policies Store', 'attendance-policies.store', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(521, 224, 'Attendance Policies Show', 'attendance-policies.show', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(522, 224, 'Attendance Policies Update', 'attendance-policies.update', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(523, 224, 'Attendance Policies Destroy', 'attendance-policies.destroy', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(524, 224, 'Shifts Store', 'shifts.store', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(525, 224, 'Shifts Show', 'shifts.show', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(526, 224, 'Shifts Update', 'shifts.update', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35'),
+(527, 224, 'Shifts Destroy', 'shifts.destroy', 0, 1, '2026-10-30 09:54:35', '2026-10-30 09:54:35');
 
 -- --------------------------------------------------------
 
@@ -1951,11 +2761,13 @@ INSERT INTO `menus` (`id`, `parent_id`, `name`, `sub_name`, `show_in_menu`, `sta
 -- Table structure for table `migrations`
 --
 
-CREATE TABLE `migrations` (
-  `id` int UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `migrations`;
+CREATE TABLE IF NOT EXISTS `migrations` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `migration` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `batch` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `batch` int NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=122 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `migrations`
@@ -2054,7 +2866,33 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (92, '2026_08_19_000001_create_leave_types_table', 72),
 (93, '2026_08_19_000002_create_leave_policies_table', 73),
 (94, '2026_08_19_000003_create_leave_applications_table', 74),
-(95, '2026_08_19_000004_create_leave_balances_table', 74);
+(95, '2026_08_19_000004_create_leave_balances_table', 74),
+(96, '2026_08_30_000001_add_location_fields_to_branches_table', 75),
+(97, '2026_08_30_000002_add_description_to_departments_table', 75),
+(98, '2026_08_30_000003_add_description_to_designations_table', 75),
+(99, '2026_08_30_000004_expand_holidays_table', 75),
+(100, '2026_08_30_000005_expand_announcements_table', 75),
+(101, '2026_09_01_000001_create_awards_table', 76),
+(102, '2026_09_02_000011_create_employee_promotions_table', 77),
+(103, '2026_09_03_000001_create_employee_transfers_table', 78),
+(104, '2026_09_03_000002_create_employee_warnings_table', 78),
+(105, '2026_09_03_000003_make_promotion_effective_date_nullable', 78),
+(106, '2026_09_03_000004_create_employee_resignations_table', 79),
+(107, '2026_09_03_000005_create_termination_tables', 79),
+(108, '2026_09_03_000006_make_departments_branch_id_nullable', 79),
+(109, '2026_09_03_000007_create_complaint_tables', 79),
+(110, '2026_09_04_120113_create_attendance_policies_table', 80),
+(111, '2026_09_05_123352_create_shifts_table', 81),
+(112, '2026_09_06_000001_create_employee_trips_table', 82),
+(113, '2026_09_06_000002_create_trip_expenses_table', 82),
+(114, '2026_09_07_000001_create_review_cycles_table', 83),
+(115, '2026_09_07_000002_make_review_cycle_dates_nullable', 83),
+(116, '2026_09_07_000003_create_employee_reviews_table', 83),
+(117, '2026_09_07_000004_add_ratings_to_employee_reviews', 83),
+(118, '2026_09_07_000005_create_goal_types_table', 83),
+(119, '2026_09_07_000006_create_employee_goals_table', 83),
+(120, '2026_09_09_000001_create_indicator_categories_table', 84),
+(121, '2026_09_09_000002_create_performance_indicators_table', 84);
 
 -- --------------------------------------------------------
 
@@ -2062,13 +2900,16 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 -- Table structure for table `newsletter_subscribers`
 --
 
-CREATE TABLE `newsletter_subscribers` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `newsletter_subscribers`;
+CREATE TABLE IF NOT EXISTS `newsletter_subscribers` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `email` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `source` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'footer',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `newsletter_subscribers_email_unique` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `newsletter_subscribers`
@@ -2084,8 +2925,9 @@ INSERT INTO `newsletter_subscribers` (`id`, `email`, `source`, `created_at`, `up
 -- Table structure for table `orders`
 --
 
-CREATE TABLE `orders` (
-  `id` int NOT NULL,
+DROP TABLE IF EXISTS `orders`;
+CREATE TABLE IF NOT EXISTS `orders` (
+  `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   `session_id` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `billing_address_id` int DEFAULT NULL,
@@ -2115,8 +2957,12 @@ CREATE TABLE `orders` (
   `steadfast_consignment_id` bigint UNSIGNED DEFAULT NULL,
   `steadfast_tracking_code` varchar(191) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `steadfast_status` varchar(191) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
-  `steadfast_response` json DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+  `steadfast_response` json DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `orders_assigned_agent_id_index` (`assigned_agent_id`),
+  KEY `orders_steadfast_consignment_id_index` (`steadfast_consignment_id`),
+  KEY `orders_steadfast_tracking_code_index` (`steadfast_tracking_code`)
+) ENGINE=MyISAM AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 --
 -- Dumping data for table `orders`
@@ -2139,8 +2985,9 @@ INSERT INTO `orders` (`id`, `user_id`, `session_id`, `billing_address_id`, `assi
 -- Table structure for table `order_details`
 --
 
-CREATE TABLE `order_details` (
-  `id` int NOT NULL,
+DROP TABLE IF EXISTS `order_details`;
+CREATE TABLE IF NOT EXISTS `order_details` (
+  `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   `session_id` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `product_id` int NOT NULL,
@@ -2153,8 +3000,9 @@ CREATE TABLE `order_details` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL,
   `product_color` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
-  `product_size` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+  `product_size` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 --
 -- Dumping data for table `order_details`
@@ -2179,8 +3027,9 @@ INSERT INTO `order_details` (`id`, `user_id`, `session_id`, `product_id`, `order
 -- Table structure for table `order_info`
 --
 
-CREATE TABLE `order_info` (
-  `order_id` int NOT NULL,
+DROP TABLE IF EXISTS `order_info`;
+CREATE TABLE IF NOT EXISTS `order_info` (
+  `order_id` int NOT NULL AUTO_INCREMENT,
   `invoice_no` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `customer_id` int DEFAULT NULL,
   `mobile_number` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -2194,7 +3043,8 @@ CREATE TABLE `order_info` (
   `status` enum('New','Pending','Processing','Completed','Cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'New',
   `order_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -2203,8 +3053,9 @@ CREATE TABLE `order_info` (
 -- Table structure for table `outlet_locations`
 --
 
-CREATE TABLE `outlet_locations` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `outlet_locations`;
+CREATE TABLE IF NOT EXISTS `outlet_locations` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `location_name` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `hotline` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -2212,8 +3063,10 @@ CREATE TABLE `outlet_locations` (
   `sort_order` int UNSIGNED NOT NULL DEFAULT '0',
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `outlet_locations_status_index` (`status`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `outlet_locations`
@@ -2240,11 +3093,13 @@ INSERT INTO `outlet_locations` (`id`, `location_name`, `address`, `hotline`, `ma
 -- Table structure for table `outlet_page_settings`
 --
 
-CREATE TABLE `outlet_page_settings` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `outlet_page_settings`;
+CREATE TABLE IF NOT EXISTS `outlet_page_settings` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `banner_image` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -2253,11 +3108,48 @@ CREATE TABLE `outlet_page_settings` (
 -- Table structure for table `password_reset_tokens`
 --
 
-CREATE TABLE `password_reset_tokens` (
+DROP TABLE IF EXISTS `password_reset_tokens`;
+CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
   `email` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `token` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `performance_indicators`
+--
+
+DROP TABLE IF EXISTS `performance_indicators`;
+CREATE TABLE IF NOT EXISTS `performance_indicators` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `indicator_category_id` bigint UNSIGNED NOT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `measurement_unit` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `target_value` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `performance_indicators_name_unique` (`name`),
+  KEY `performance_indicators_indicator_category_id_foreign` (`indicator_category_id`),
+  KEY `performance_indicators_status_index` (`status`)
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `performance_indicators`
+--
+
+INSERT INTO `performance_indicators` (`id`, `indicator_category_id`, `name`, `description`, `measurement_unit`, `target_value`, `status`, `created_at`, `updated_at`) VALUES
+(1, 10, 'Skill Proficiency', 'Level of expertise in job-related technical skills', 'Rating', '4/5', 1, '2026-09-10 02:27:59', '2026-09-10 02:27:59'),
+(2, 7, 'Learning Agility', 'Speed and effectiveness in acquiring new skills and knowledge', 'Rating', '4/5', 1, '2026-09-10 02:28:37', '2026-09-10 02:28:37'),
+(3, 7, 'Stress Management', 'Ability to maintain performance under pressure', 'Rating', '3/5', 1, '2026-09-10 02:29:17', '2026-09-10 02:29:17'),
+(4, 8, 'Priority Management', 'Effectiveness in organizing and prioritizing multiple tasks', 'Raing', '4/5', 1, '2026-09-10 02:30:40', '2026-09-10 02:30:40'),
+(5, 8, 'Efficiency Rating', 'Optimal use of time and resources to achieve objectives', 'Rating', '4/5', 1, '2026-09-10 02:31:22', '2026-09-10 02:31:22'),
+(6, 9, 'Response Time', 'Speed in responding to customer inquiries and requests', 'Hours', '<24', 1, '2026-09-10 02:32:09', '2026-09-10 02:32:23');
 
 -- --------------------------------------------------------
 
@@ -2265,15 +3157,18 @@ CREATE TABLE `password_reset_tokens` (
 -- Table structure for table `permissions`
 --
 
-CREATE TABLE `permissions` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `permissions`;
+CREATE TABLE IF NOT EXISTS `permissions` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `parent_id` int DEFAULT NULL,
   `permission_group_id` bigint UNSIGNED NOT NULL,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `slug` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `details` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `permissions_permission_group_id_foreign` (`permission_group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -2282,12 +3177,14 @@ CREATE TABLE `permissions` (
 -- Table structure for table `permission_groups`
 --
 
-CREATE TABLE `permission_groups` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `permission_groups`;
+CREATE TABLE IF NOT EXISTS `permission_groups` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `slug` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -2296,8 +3193,9 @@ CREATE TABLE `permission_groups` (
 -- Table structure for table `personal_access_tokens`
 --
 
-CREATE TABLE `personal_access_tokens` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `personal_access_tokens`;
+CREATE TABLE IF NOT EXISTS `personal_access_tokens` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `tokenable_type` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tokenable_id` bigint UNSIGNED NOT NULL,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -2306,8 +3204,11 @@ CREATE TABLE `personal_access_tokens` (
   `last_used_at` timestamp NULL DEFAULT NULL,
   `expires_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
+  KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `personal_access_tokens`
@@ -2334,8 +3235,9 @@ INSERT INTO `personal_access_tokens` (`id`, `tokenable_type`, `tokenable_id`, `n
 -- Table structure for table `products`
 --
 
-CREATE TABLE `products` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `products`;
+CREATE TABLE IF NOT EXISTS `products` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `category_id` int DEFAULT NULL,
   `brand_id` int DEFAULT NULL,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -2381,8 +3283,10 @@ CREATE TABLE `products` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `size_chart_title` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `size_chart_columns` json DEFAULT NULL,
-  `size_chart_rows` json DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `size_chart_rows` json DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `products_slug_unique` (`slug`)
+) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `products`
@@ -2414,9 +3318,12 @@ INSERT INTO `products` (`id`, `category_id`, `brand_id`, `name`, `slug`, `descri
 -- Table structure for table `product_color`
 --
 
-CREATE TABLE `product_color` (
+DROP TABLE IF EXISTS `product_color`;
+CREATE TABLE IF NOT EXISTS `product_color` (
   `product_id` bigint UNSIGNED NOT NULL,
-  `product_color_id` bigint UNSIGNED NOT NULL
+  `product_color_id` bigint UNSIGNED NOT NULL,
+  PRIMARY KEY (`product_id`,`product_color_id`),
+  KEY `product_color_product_color_id_foreign` (`product_color_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -2436,14 +3343,17 @@ INSERT INTO `product_color` (`product_id`, `product_color_id`) VALUES
 -- Table structure for table `product_colors`
 --
 
-CREATE TABLE `product_colors` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `product_colors`;
+CREATE TABLE IF NOT EXISTS `product_colors` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `hex_code` varchar(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `product_colors_name_unique` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `product_colors`
@@ -2460,9 +3370,12 @@ INSERT INTO `product_colors` (`id`, `name`, `hex_code`, `status`, `created_at`, 
 -- Table structure for table `product_size`
 --
 
-CREATE TABLE `product_size` (
+DROP TABLE IF EXISTS `product_size`;
+CREATE TABLE IF NOT EXISTS `product_size` (
   `product_id` bigint UNSIGNED NOT NULL,
-  `product_size_id` bigint UNSIGNED NOT NULL
+  `product_size_id` bigint UNSIGNED NOT NULL,
+  PRIMARY KEY (`product_id`,`product_size_id`),
+  KEY `product_size_product_size_id_foreign` (`product_size_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -2484,14 +3397,17 @@ INSERT INTO `product_size` (`product_id`, `product_size_id`) VALUES
 -- Table structure for table `product_sizes`
 --
 
-CREATE TABLE `product_sizes` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `product_sizes`;
+CREATE TABLE IF NOT EXISTS `product_sizes` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `sort_order` int UNSIGNED NOT NULL DEFAULT '0',
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `product_sizes_name_unique` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `product_sizes`
@@ -2510,8 +3426,9 @@ INSERT INTO `product_sizes` (`id`, `name`, `sort_order`, `status`, `created_at`,
 -- Table structure for table `product_specification`
 --
 
-CREATE TABLE `product_specification` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `product_specification`;
+CREATE TABLE IF NOT EXISTS `product_specification` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `product_id` int UNSIGNED DEFAULT NULL,
   `work_order_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `work_order_value` decimal(15,2) NOT NULL,
@@ -2532,7 +3449,8 @@ CREATE TABLE `product_specification` (
   `tax_exemption_certificate` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -2541,8 +3459,9 @@ CREATE TABLE `product_specification` (
 -- Table structure for table `promotions`
 --
 
-CREATE TABLE `promotions` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `promotions`;
+CREATE TABLE IF NOT EXISTS `promotions` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `promotion_title` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `file_location` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -2551,8 +3470,9 @@ CREATE TABLE `promotions` (
   `promo_type` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` tinyint NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `promotions`
@@ -2584,11 +3504,47 @@ INSERT INTO `promotions` (`id`, `promotion_title`, `description`, `file_location
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `review_cycles`
+--
+
+DROP TABLE IF EXISTS `review_cycles`;
+CREATE TABLE IF NOT EXISTS `review_cycles` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `frequency` enum('Monthly','Quarterly','Semi-Annual','Annual','Custom') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Annual',
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `review_cycles_name_unique` (`name`)
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `review_cycles`
+--
+
+INSERT INTO `review_cycles` (`id`, `name`, `frequency`, `start_date`, `end_date`, `description`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Monthly Performance Review', 'Monthly', NULL, NULL, 'Monthly review', 1, '2026-09-10 02:33:06', '2026-09-10 02:33:06'),
+(2, 'Quarterly Business Review', 'Quarterly', NULL, NULL, 'Comprehensive quarterly assessment of employee performance, goal achievement, and development planning', 1, '2026-09-10 02:33:33', '2026-09-10 02:33:33'),
+(3, 'Mid-Year Performance Review', 'Semi-Annual', NULL, NULL, 'Mid-year review', 1, '2026-09-10 02:33:50', '2026-09-10 02:33:50'),
+(4, 'Annual Performance Appraisal', 'Annual', NULL, NULL, 'Annual appraisal', 1, '2026-09-10 02:34:06', '2026-09-10 02:34:06'),
+(5, 'Probationary Review', 'Quarterly', NULL, NULL, 'Performance evaluation for employees during probationary period to assess job fit and performance standards', 1, '2026-09-10 02:34:27', '2026-09-10 02:34:27'),
+(6, 'Project Completion Review', 'Monthly', NULL, NULL, 'Project outcome review', 1, '2026-09-10 02:34:45', '2026-09-10 02:34:45'),
+(7, 'Leadership Assessment Cycle', 'Semi-Annual', NULL, NULL, 'Leadership Assessment review', 1, '2026-09-10 02:35:17', '2026-09-10 02:35:17'),
+(8, 'Sales Performance Review', 'Quarterly', NULL, NULL, 'Performance evaluation specifically designed for sales team members focusing on targets and customer relationships', 1, '2026-09-10 02:35:36', '2026-09-10 02:35:36');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `roles`
 --
 
-CREATE TABLE `roles` (
-  `id` int NOT NULL,
+DROP TABLE IF EXISTS `roles`;
+CREATE TABLE IF NOT EXISTS `roles` (
+  `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `slug` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `menu_details` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -2596,8 +3552,9 @@ CREATE TABLE `roles` (
   `permission_ids` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
   `status` tinyint NOT NULL COMMENT '0 => Inactive, 1 => Active',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `roles`
@@ -2615,9 +3572,12 @@ INSERT INTO `roles` (`id`, `name`, `slug`, `menu_details`, `permission_details`,
 -- Table structure for table `roles_permissions`
 --
 
-CREATE TABLE `roles_permissions` (
+DROP TABLE IF EXISTS `roles_permissions`;
+CREATE TABLE IF NOT EXISTS `roles_permissions` (
   `role_id` char(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `permission_id` char(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
+  `permission_id` char(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`role_id`,`permission_id`),
+  KEY `roles_permissions_permission_id_foreign` (`permission_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -2626,8 +3586,9 @@ CREATE TABLE `roles_permissions` (
 -- Table structure for table `salesman`
 --
 
-CREATE TABLE `salesman` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `salesman`;
+CREATE TABLE IF NOT EXISTS `salesman` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `phone_number` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -2636,7 +3597,8 @@ CREATE TABLE `salesman` (
   `profile_image` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `status` tinyint NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -2645,13 +3607,17 @@ CREATE TABLE `salesman` (
 -- Table structure for table `sessions`
 --
 
-CREATE TABLE `sessions` (
+DROP TABLE IF EXISTS `sessions`;
+CREATE TABLE IF NOT EXISTS `sessions` (
   `id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `user_id` bigint UNSIGNED DEFAULT NULL,
   `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `user_agent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `last_activity` int NOT NULL
+  `last_activity` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sessions_user_id_index` (`user_id`),
+  KEY `sessions_last_activity_index` (`last_activity`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -2660,8 +3626,9 @@ CREATE TABLE `sessions` (
 -- Table structure for table `settings`
 --
 
-CREATE TABLE `settings` (
-  `id` int NOT NULL,
+DROP TABLE IF EXISTS `settings`;
+CREATE TABLE IF NOT EXISTS `settings` (
+  `id` int NOT NULL AUTO_INCREMENT,
   `product_contact_address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `whats_app_chat_link` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `messanger_link` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -2713,8 +3680,9 @@ CREATE TABLE `settings` (
   `gtm_footer_code` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `google_analytics_code` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `custom_header_code` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `custom_footer_code` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `custom_footer_code` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `settings`
@@ -2729,22 +3697,59 @@ INSERT INTO `settings` (`id`, `product_contact_address`, `whats_app_chat_link`, 
 -- Table structure for table `shifts`
 --
 
-CREATE TABLE `shifts` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `shifts`;
+CREATE TABLE IF NOT EXISTS `shifts` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `break_duration` int UNSIGNED NOT NULL DEFAULT '0',
+  `break_start_time` time DEFAULT NULL,
+  `break_end_time` time DEFAULT NULL,
+  `grace_period` int UNSIGNED NOT NULL DEFAULT '0',
+  `is_night_shift` tinyint(1) NOT NULL DEFAULT '0',
+  `status` enum('active','inactive') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `shifts_status_index` (`status`),
+  KEY `shifts_is_night_shift_index` (`is_night_shift`)
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `shifts`
+--
+
+INSERT INTO `shifts` (`id`, `name`, `description`, `start_time`, `end_time`, `break_duration`, `break_start_time`, `break_end_time`, `grace_period`, `is_night_shift`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Morning Shift', 'Standard morning shift for regular office hours', '09:00:00', '18:00:00', 60, '13:00:00', '14:00:00', 14, 0, 'active', '2026-09-05 09:21:54', '2026-09-05 13:09:49'),
+(2, 'Evening Shift', 'Evening shift for extended business hours', '14:00:00', '23:00:00', 60, '18:00:00', '19:00:00', 15, 0, 'active', '2026-09-05 13:36:37', '2026-09-05 17:46:06'),
+(4, 'Night Shift', 'Night shift for 24/7 operations and support', '22:00:00', '07:00:00', 60, '02:00:00', '03:00:00', 15, 1, 'active', '2026-09-05 14:18:19', '2026-09-05 14:18:19');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shifts_old`
+--
+
+DROP TABLE IF EXISTS `shifts_old`;
+CREATE TABLE IF NOT EXISTS `shifts_old` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `code` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `start_time` time DEFAULT NULL,
   `end_time` time DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `shifts`
+-- Dumping data for table `shifts_old`
 --
 
-INSERT INTO `shifts` (`id`, `name`, `code`, `start_time`, `end_time`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `shifts_old` (`id`, `name`, `code`, `start_time`, `end_time`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'General Shift', 'GS', NULL, NULL, 1, '2026-08-12 07:17:24', '2026-08-12 07:17:24');
 
 -- --------------------------------------------------------
@@ -2753,14 +3758,17 @@ INSERT INTO `shifts` (`id`, `name`, `code`, `start_time`, `end_time`, `status`, 
 -- Table structure for table `shipping_methods`
 --
 
-CREATE TABLE `shipping_methods` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `shipping_methods`;
+CREATE TABLE IF NOT EXISTS `shipping_methods` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `price` decimal(12,2) NOT NULL DEFAULT '0.00',
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `shipping_methods_name_unique` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `shipping_methods`
@@ -2776,16 +3784,19 @@ INSERT INTO `shipping_methods` (`id`, `name`, `price`, `status`, `created_at`, `
 -- Table structure for table `size_chart_templates`
 --
 
-CREATE TABLE `size_chart_templates` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `size_chart_templates`;
+CREATE TABLE IF NOT EXISTS `size_chart_templates` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `title` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `columns` json NOT NULL,
   `rows` json NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `size_chart_templates_name_unique` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `size_chart_templates`
@@ -2800,15 +3811,17 @@ INSERT INTO `size_chart_templates` (`id`, `name`, `title`, `columns`, `rows`, `i
 -- Table structure for table `sliders`
 --
 
-CREATE TABLE `sliders` (
-  `id` int NOT NULL,
+DROP TABLE IF EXISTS `sliders`;
+CREATE TABLE IF NOT EXISTS `sliders` (
+  `id` int NOT NULL AUTO_INCREMENT,
   `slider_title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `slider_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `slider_description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` tinyint NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `sliders`
@@ -2825,8 +3838,9 @@ INSERT INTO `sliders` (`id`, `slider_title`, `slider_image`, `slider_description
 -- Table structure for table `sms_log`
 --
 
-CREATE TABLE `sms_log` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `sms_log`;
+CREATE TABLE IF NOT EXISTS `sms_log` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `campaign_id` char(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `user_id` char(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `sms_from` char(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -2836,7 +3850,8 @@ CREATE TABLE `sms_log` (
   `delivery_time` datetime DEFAULT NULL,
   `send_status` tinyint DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -2845,8 +3860,9 @@ CREATE TABLE `sms_log` (
 -- Table structure for table `sms_queue`
 --
 
-CREATE TABLE `sms_queue` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `sms_queue`;
+CREATE TABLE IF NOT EXISTS `sms_queue` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `campaign_id` char(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `customer_id` bigint DEFAULT NULL,
   `meeting_id` char(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -2863,8 +3879,9 @@ CREATE TABLE `sms_queue` (
   `delete_request` tinyint DEFAULT NULL,
   `user_id` bigint DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=200 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `sms_queue`
@@ -2927,16 +3944,18 @@ INSERT INTO `sms_queue` (`id`, `campaign_id`, `customer_id`, `meeting_id`, `sms_
 -- Table structure for table `sms_templates`
 --
 
-CREATE TABLE `sms_templates` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `sms_templates`;
+CREATE TABLE IF NOT EXISTS `sms_templates` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `title` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `status` tinyint DEFAULT NULL,
   `created_by` bigint DEFAULT NULL,
   `updated_by` bigint DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `sms_templates`
@@ -2954,12 +3973,14 @@ INSERT INTO `sms_templates` (`id`, `title`, `description`, `status`, `created_by
 -- Table structure for table `state`
 --
 
-CREATE TABLE `state` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `state`;
+CREATE TABLE IF NOT EXISTS `state` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `country_id` int NOT NULL,
   `state_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -2968,8 +3989,9 @@ CREATE TABLE `state` (
 -- Table structure for table `tasks`
 --
 
-CREATE TABLE `tasks` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `tasks`;
+CREATE TABLE IF NOT EXISTS `tasks` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `task_name` char(180) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `due_date` datetime NOT NULL,
@@ -2977,8 +3999,51 @@ CREATE TABLE `tasks` (
   `created_by` bigint NOT NULL,
   `status` tinyint DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `termination_types`
+--
+
+DROP TABLE IF EXISTS `termination_types`;
+CREATE TABLE IF NOT EXISTS `termination_types` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `termination_types_name_unique` (`name`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `trip_expenses`
+--
+
+DROP TABLE IF EXISTS `trip_expenses`;
+CREATE TABLE IF NOT EXISTS `trip_expenses` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `employee_trip_id` bigint UNSIGNED NOT NULL,
+  `expense_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expense_date` date NOT NULL,
+  `amount` decimal(14,2) NOT NULL,
+  `currency` varchar(3) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'BDT',
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `receipt_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reimbursable` tinyint(1) NOT NULL DEFAULT '1',
+  `status` enum('Pending','Approved','Paid','Rejected') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `trip_expenses_employee_trip_id_foreign` (`employee_trip_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -2986,8 +4051,9 @@ CREATE TABLE `tasks` (
 -- Table structure for table `users`
 --
 
-CREATE TABLE `users` (
-  `id` bigint UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` char(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `username` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `first_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -3007,8 +4073,11 @@ CREATE TABLE `users` (
   `remember_token` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB AUTO_INCREMENT=90 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `users`
@@ -3031,7 +4100,8 @@ INSERT INTO `users` (`id`, `user_id`, `username`, `first_name`, `last_name`, `em
 -- Table structure for table `users_roles`
 --
 
-CREATE TABLE `users_roles` (
+DROP TABLE IF EXISTS `users_roles`;
+CREATE TABLE IF NOT EXISTS `users_roles` (
   `user_id` char(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `role_id` bigint UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -3042,8 +4112,9 @@ CREATE TABLE `users_roles` (
 -- Table structure for table `wishlists`
 --
 
-CREATE TABLE `wishlists` (
-  `id` int NOT NULL,
+DROP TABLE IF EXISTS `wishlists`;
+CREATE TABLE IF NOT EXISTS `wishlists` (
+  `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   `session_id` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `product_id` int NOT NULL,
@@ -3051,8 +4122,9 @@ CREATE TABLE `wishlists` (
   `product_image` varchar(190) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `unit_price` decimal(10,2) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 --
 -- Dumping data for table `wishlists`
@@ -3078,963 +4150,6 @@ INSERT INTO `wishlists` (`id`, `user_id`, `session_id`, `product_id`, `product_n
 (23, NULL, '2905562793330', 48, 'Lg Front glass Gas stove', 'IMG_20260628_025152_1782593698.jpg', '1650.00', '2026-06-28 14:29:17', '2026-06-28 14:29:17'),
 (36, 85, NULL, 62, 'Mufutau Moran do quam quidem e', '69d5da3bddb9d-square_1783862003.jpg', '461.00', '2026-07-14 11:23:24', '2026-07-14 11:23:24'),
 (35, 85, NULL, 69, 'Castor Vasquez', '67dba9546f2b0-square_1783946094.jpg', '400.00', '2026-07-14 11:23:13', '2026-07-14 11:23:13');
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `agents`
---
-ALTER TABLE `agents`
-  ADD PRIMARY KEY (`agent_id`),
-  ADD KEY `agents_user_id_foreign` (`user_id`);
-
---
--- Indexes for table `announcements`
---
-ALTER TABLE `announcements`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `attendance_policies`
---
-ALTER TABLE `attendance_policies`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `award_types`
---
-ALTER TABLE `award_types`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `bank_info`
---
-ALTER TABLE `bank_info`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `billing_address`
---
-ALTER TABLE `billing_address`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `bloggers_category`
---
-ALTER TABLE `bloggers_category`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `blogs`
---
-ALTER TABLE `blogs`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `branches`
---
-ALTER TABLE `branches`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `brands`
---
-ALTER TABLE `brands`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `campaigns`
---
-ALTER TABLE `campaigns`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `campaigns_promotion_id_index` (`promotion_id`);
-
---
--- Indexes for table `campaign_data`
---
-ALTER TABLE `campaign_data`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `campaign_data_email_unique` (`email`);
-
---
--- Indexes for table `careers`
---
-ALTER TABLE `careers`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `carts`
---
-ALTER TABLE `carts`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `categories`
---
-ALTER TABLE `categories`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `categories_category_slug_unique` (`category_slug`);
-
---
--- Indexes for table `city`
---
-ALTER TABLE `city`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `countries`
---
-ALTER TABLE `countries`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `country`
---
-ALTER TABLE `country`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `currencies`
---
-ALTER TABLE `currencies`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `customers_old`
---
-ALTER TABLE `customers_old`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `customer_id` (`customer_id`);
-
---
--- Indexes for table `customer_info`
---
-ALTER TABLE `customer_info`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `departments`
---
-ALTER TABLE `departments`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `designations`
---
-ALTER TABLE `designations`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `developer department`
---
-ALTER TABLE `developer department`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `developer department_web design_unique` (`web design`);
-
---
--- Indexes for table `document_types`
---
-ALTER TABLE `document_types`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `email_log`
---
-ALTER TABLE `email_log`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `email_queue`
---
-ALTER TABLE `email_queue`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `email_templates`
---
-ALTER TABLE `email_templates`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `employees`
---
-ALTER TABLE `employees`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `employees_employee_code_unique` (`employee_code`),
-  ADD UNIQUE KEY `employees_email_unique` (`email`);
-
---
--- Indexes for table `employee_documents`
---
-ALTER TABLE `employee_documents`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `employee_documents_employee_id_index` (`employee_id`);
-
---
--- Indexes for table `failed_jobs`
---
-ALTER TABLE `failed_jobs`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`);
-
---
--- Indexes for table `faqs`
---
-ALTER TABLE `faqs`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `faqs_is_active_sort_order_index` (`is_active`,`sort_order`);
-
---
--- Indexes for table `file_section`
---
-ALTER TABLE `file_section`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `holidays`
---
-ALTER TABLE `holidays`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `home_page_settings`
---
-ALTER TABLE `home_page_settings`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `invoices`
---
-ALTER TABLE `invoices`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `invoice_custom_form`
---
-ALTER TABLE `invoice_custom_form`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `jobs`
---
-ALTER TABLE `jobs`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `jobs_queue_index` (`queue`);
-
---
--- Indexes for table `leave_applications`
---
-ALTER TABLE `leave_applications`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `leave_applications_employee_id_foreign` (`employee_id`),
-  ADD KEY `leave_applications_leave_type_id_foreign` (`leave_type_id`);
-
---
--- Indexes for table `leave_balances`
---
-ALTER TABLE `leave_balances`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `leave_balances_employee_id_leave_type_id_year_unique` (`employee_id`,`leave_type_id`,`year`),
-  ADD KEY `leave_balances_leave_type_id_foreign` (`leave_type_id`);
-
---
--- Indexes for table `leave_policies`
---
-ALTER TABLE `leave_policies`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `leave_policies_leave_type_id_foreign` (`leave_type_id`);
-
---
--- Indexes for table `leave_types`
---
-ALTER TABLE `leave_types`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `logs`
---
-ALTER TABLE `logs`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `meetings`
---
-ALTER TABLE `meetings`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `menus`
---
-ALTER TABLE `menus`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `migrations`
---
-ALTER TABLE `migrations`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `newsletter_subscribers`
---
-ALTER TABLE `newsletter_subscribers`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `newsletter_subscribers_email_unique` (`email`);
-
---
--- Indexes for table `orders`
---
-ALTER TABLE `orders`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `orders_assigned_agent_id_index` (`assigned_agent_id`),
-  ADD KEY `orders_steadfast_consignment_id_index` (`steadfast_consignment_id`),
-  ADD KEY `orders_steadfast_tracking_code_index` (`steadfast_tracking_code`);
-
---
--- Indexes for table `order_details`
---
-ALTER TABLE `order_details`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `order_info`
---
-ALTER TABLE `order_info`
-  ADD PRIMARY KEY (`order_id`);
-
---
--- Indexes for table `outlet_locations`
---
-ALTER TABLE `outlet_locations`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `outlet_locations_status_index` (`status`);
-
---
--- Indexes for table `outlet_page_settings`
---
-ALTER TABLE `outlet_page_settings`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `password_reset_tokens`
---
-ALTER TABLE `password_reset_tokens`
-  ADD PRIMARY KEY (`email`);
-
---
--- Indexes for table `permissions`
---
-ALTER TABLE `permissions`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `permissions_permission_group_id_foreign` (`permission_group_id`);
-
---
--- Indexes for table `permission_groups`
---
-ALTER TABLE `permission_groups`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `personal_access_tokens`
---
-ALTER TABLE `personal_access_tokens`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
-  ADD KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`);
-
---
--- Indexes for table `products`
---
-ALTER TABLE `products`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `products_slug_unique` (`slug`);
-
---
--- Indexes for table `product_color`
---
-ALTER TABLE `product_color`
-  ADD PRIMARY KEY (`product_id`,`product_color_id`),
-  ADD KEY `product_color_product_color_id_foreign` (`product_color_id`);
-
---
--- Indexes for table `product_colors`
---
-ALTER TABLE `product_colors`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `product_colors_name_unique` (`name`);
-
---
--- Indexes for table `product_size`
---
-ALTER TABLE `product_size`
-  ADD PRIMARY KEY (`product_id`,`product_size_id`),
-  ADD KEY `product_size_product_size_id_foreign` (`product_size_id`);
-
---
--- Indexes for table `product_sizes`
---
-ALTER TABLE `product_sizes`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `product_sizes_name_unique` (`name`);
-
---
--- Indexes for table `product_specification`
---
-ALTER TABLE `product_specification`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `promotions`
---
-ALTER TABLE `promotions`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `roles`
---
-ALTER TABLE `roles`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `roles_permissions`
---
-ALTER TABLE `roles_permissions`
-  ADD PRIMARY KEY (`role_id`,`permission_id`),
-  ADD KEY `roles_permissions_permission_id_foreign` (`permission_id`);
-
---
--- Indexes for table `salesman`
---
-ALTER TABLE `salesman`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `sessions`
---
-ALTER TABLE `sessions`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `sessions_user_id_index` (`user_id`),
-  ADD KEY `sessions_last_activity_index` (`last_activity`);
-
---
--- Indexes for table `settings`
---
-ALTER TABLE `settings`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `shifts`
---
-ALTER TABLE `shifts`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `shipping_methods`
---
-ALTER TABLE `shipping_methods`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `shipping_methods_name_unique` (`name`);
-
---
--- Indexes for table `size_chart_templates`
---
-ALTER TABLE `size_chart_templates`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `size_chart_templates_name_unique` (`name`);
-
---
--- Indexes for table `sliders`
---
-ALTER TABLE `sliders`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `sms_log`
---
-ALTER TABLE `sms_log`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `sms_queue`
---
-ALTER TABLE `sms_queue`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `sms_templates`
---
-ALTER TABLE `sms_templates`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `state`
---
-ALTER TABLE `state`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tasks`
---
-ALTER TABLE `tasks`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `users_email_unique` (`email`),
-  ADD UNIQUE KEY `username` (`username`);
-
---
--- Indexes for table `wishlists`
---
-ALTER TABLE `wishlists`
-  ADD PRIMARY KEY (`id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `announcements`
---
-ALTER TABLE `announcements`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `attendance_policies`
---
-ALTER TABLE `attendance_policies`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `award_types`
---
-ALTER TABLE `award_types`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `bank_info`
---
-ALTER TABLE `bank_info`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT for table `billing_address`
---
-ALTER TABLE `billing_address`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
-
---
--- AUTO_INCREMENT for table `bloggers_category`
---
-ALTER TABLE `bloggers_category`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `blogs`
---
-ALTER TABLE `blogs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT for table `branches`
---
-ALTER TABLE `branches`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `brands`
---
-ALTER TABLE `brands`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
-
---
--- AUTO_INCREMENT for table `campaigns`
---
-ALTER TABLE `campaigns`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
-
---
--- AUTO_INCREMENT for table `campaign_data`
---
-ALTER TABLE `campaign_data`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `careers`
---
-ALTER TABLE `careers`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `carts`
---
-ALTER TABLE `carts`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=216;
-
---
--- AUTO_INCREMENT for table `categories`
---
-ALTER TABLE `categories`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
-
---
--- AUTO_INCREMENT for table `city`
---
-ALTER TABLE `city`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `countries`
---
-ALTER TABLE `countries`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
-
---
--- AUTO_INCREMENT for table `country`
---
-ALTER TABLE `country`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `currencies`
---
-ALTER TABLE `currencies`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
-
---
--- AUTO_INCREMENT for table `customers_old`
---
-ALTER TABLE `customers_old`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT for table `customer_info`
---
-ALTER TABLE `customer_info`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `departments`
---
-ALTER TABLE `departments`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `designations`
---
-ALTER TABLE `designations`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `developer department`
---
-ALTER TABLE `developer department`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `document_types`
---
-ALTER TABLE `document_types`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `email_log`
---
-ALTER TABLE `email_log`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `email_queue`
---
-ALTER TABLE `email_queue`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=299;
-
---
--- AUTO_INCREMENT for table `email_templates`
---
-ALTER TABLE `email_templates`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
-
---
--- AUTO_INCREMENT for table `employees`
---
-ALTER TABLE `employees`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `employee_documents`
---
-ALTER TABLE `employee_documents`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `failed_jobs`
---
-ALTER TABLE `failed_jobs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
-
---
--- AUTO_INCREMENT for table `faqs`
---
-ALTER TABLE `faqs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `file_section`
---
-ALTER TABLE `file_section`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
-
---
--- AUTO_INCREMENT for table `holidays`
---
-ALTER TABLE `holidays`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `home_page_settings`
---
-ALTER TABLE `home_page_settings`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `invoices`
---
-ALTER TABLE `invoices`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `invoice_custom_form`
---
-ALTER TABLE `invoice_custom_form`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `jobs`
---
-ALTER TABLE `jobs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `leave_applications`
---
-ALTER TABLE `leave_applications`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `leave_balances`
---
-ALTER TABLE `leave_balances`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `leave_policies`
---
-ALTER TABLE `leave_policies`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `leave_types`
---
-ALTER TABLE `leave_types`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `logs`
---
-ALTER TABLE `logs`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=340;
-
---
--- AUTO_INCREMENT for table `meetings`
---
-ALTER TABLE `meetings`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `menus`
---
-ALTER TABLE `menus`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=382;
-
---
--- AUTO_INCREMENT for table `migrations`
---
-ALTER TABLE `migrations`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
-
---
--- AUTO_INCREMENT for table `newsletter_subscribers`
---
-ALTER TABLE `newsletter_subscribers`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `orders`
---
-ALTER TABLE `orders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
-
---
--- AUTO_INCREMENT for table `order_details`
---
-ALTER TABLE `order_details`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
-
---
--- AUTO_INCREMENT for table `order_info`
---
-ALTER TABLE `order_info`
-  MODIFY `order_id` int NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `outlet_locations`
---
-ALTER TABLE `outlet_locations`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
-
---
--- AUTO_INCREMENT for table `outlet_page_settings`
---
-ALTER TABLE `outlet_page_settings`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `permissions`
---
-ALTER TABLE `permissions`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `permission_groups`
---
-ALTER TABLE `permission_groups`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `personal_access_tokens`
---
-ALTER TABLE `personal_access_tokens`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
-
---
--- AUTO_INCREMENT for table `products`
---
-ALTER TABLE `products`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
-
---
--- AUTO_INCREMENT for table `product_colors`
---
-ALTER TABLE `product_colors`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `product_sizes`
---
-ALTER TABLE `product_sizes`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `product_specification`
---
-ALTER TABLE `product_specification`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `promotions`
---
-ALTER TABLE `promotions`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
-
---
--- AUTO_INCREMENT for table `roles`
---
-ALTER TABLE `roles`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
-
---
--- AUTO_INCREMENT for table `salesman`
---
-ALTER TABLE `salesman`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `settings`
---
-ALTER TABLE `settings`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `shifts`
---
-ALTER TABLE `shifts`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `shipping_methods`
---
-ALTER TABLE `shipping_methods`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `size_chart_templates`
---
-ALTER TABLE `size_chart_templates`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `sliders`
---
-ALTER TABLE `sliders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT for table `sms_log`
---
-ALTER TABLE `sms_log`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `sms_queue`
---
-ALTER TABLE `sms_queue`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=200;
-
---
--- AUTO_INCREMENT for table `sms_templates`
---
-ALTER TABLE `sms_templates`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
-
---
--- AUTO_INCREMENT for table `state`
---
-ALTER TABLE `state`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tasks`
---
-ALTER TABLE `tasks`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
-
---
--- AUTO_INCREMENT for table `wishlists`
---
-ALTER TABLE `wishlists`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- Constraints for dumped tables
