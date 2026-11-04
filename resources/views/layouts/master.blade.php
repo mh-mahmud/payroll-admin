@@ -272,7 +272,7 @@
 										<div class="menu-item"><a class="menu-link" href="javascript:void(0)"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Attendance Records</span></a></div>
 										<div class="menu-item"><a class="menu-link" href="javascript:void(0)"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Biometric Attendance</span></a></div>
 										<div class="menu-item"><a class="menu-link" href="javascript:void(0)"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Attendance Regularizations</span></a></div>
-										<div class="menu-item"><a class="menu-link {{ request()->routeIs('shifts*') ? 'active' : '' }}" href="{{ route('shifts') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Shifts</span></a></div>
+										<div class="menu-item"><a class="menu-link {{ request()->routeIs('shifts*') ? 'active' : '' }}" href="{{ route('shifts.index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Shifts</span></a></div>
 										<div class="menu-item"><a class="menu-link {{ request()->routeIs('attendance-policies*') ? 'active' : '' }}" href="{{ route('attendance-policies') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Attendance Policies</span></a></div>
 									</div>
 								</div>
@@ -366,7 +366,7 @@
 							@endif
 
 							<!-- Attendance Menu (Timesheet intentionally excluded) -->
-							<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('shifts*', 'attendance-policies*') ? 'here show' : '' }}">
+							<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('attendance-policies*') ? 'here show' : '' }}">
 								<span class="menu-link">
 									<span class="menu-icon"><span class="svg-icon svg-icon-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></span>
 									<span class="menu-title">Attendance</span><span class="menu-arrow"></span>
@@ -375,7 +375,9 @@
 									<div class="menu-item"><a class="menu-link" href="javascript:void(0)"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Attendance Records</span></a></div>
 									<div class="menu-item"><a class="menu-link" href="javascript:void(0)"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Biometric Attendance</span></a></div>
 									<div class="menu-item"><a class="menu-link" href="javascript:void(0)"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Attendance Regularizations</span></a></div>
-									<div class="menu-item"><a class="menu-link {{ request()->routeIs('shifts.*') ? 'active' : '' }}" href="{{ route('shifts.index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Shifts</span></a></div>
+									
+
+
 									<div class="menu-item"><a class="menu-link {{ request()->routeIs('attendance-policies.*') ? 'active' : '' }}" href="{{ route('attendance-policies.index') }}"><span class="menu-bullet"><span class="bullet bullet-dot"></span></span><span class="menu-title">Attendance Policies</span></a></div>
 								</div>
 							</div>
@@ -433,73 +435,76 @@
 							</div>
 
 
-							<!-- Shifts Menu -->
-							<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('shifts*', 'leave-policies*', 'leave-applications*', 'leave-balances*') ? 'here show' : '' }}">
-								<span class="menu-link">
-									<span class="menu-icon">
-										<span class="svg-icon svg-icon-2">
-											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-												<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-												<line x1="16" y1="2" x2="16" y2="6"></line>
-												<line x1="8" y1="2" x2="8" y2="6"></line>
-												<line x1="3" y1="10" x2="21" y2="10"></line>
-											</svg>
-										</span>
-									</span>
-									<span class="menu-title">Shifts</span>
-									<span class="menu-arrow"></span>
-								</span>
-								<div class="menu-sub menu-sub-accordion menu-active-bg">
-									<div class="menu-item">
-										<a class="menu-link {{ request()->routeIs('shifts.*') ? 'active' : '' }}" href="{{ route('shifts.index') }}">
-											<span class="menu-bullet">
-												<span class="bullet bullet-dot"></span>
-											</span>
-											<span class="menu-title">Shift List</span>
-										</a>
-									</div>
-									<div class="menu-item">
-										<a class="menu-link {{ request()->routeIs('shift-basic-settings*') ? 'active' : '' }}" href="">
-											<span class="menu-bullet">
-												<span class="bullet bullet-dot"></span>
-											</span>
-											<span class="menu-title">Basic Settings</span>
-										</a>
-									</div>
-									<div class="menu-item">
-										<a class="menu-link {{ request()->routeIs('leave-types*') ? 'active' : '' }}" href="{{ route('leave-types') }}">
-											<span class="menu-bullet">
-												<span class="bullet bullet-dot"></span>
-											</span>
-											<span class="menu-title">Break Time Settings</span>
-										</a>
-									</div>
-									<div class="menu-item">
-										<a class="menu-link {{ request()->routeIs('leave-policies*') ? 'active' : '' }}" href="{{ route('leave-policies') }}">
-											<span class="menu-bullet">
-												<span class="bullet bullet-dot"></span>
-											</span>
-											<span class="menu-title">Rule Settings</span>
-										</a>
-									</div>
-									<div class="menu-item">
-										<a class="menu-link {{ request()->routeIs('leave-policies*') ? 'active' : '' }}" href="{{ route('leave-policies') }}">
-											<span class="menu-bullet">
-												<span class="bullet bullet-dot"></span>
-											</span>
-											<span class="menu-title">Overtime rule</span>
-										</a>
-									</div>
-									<div class="menu-item">
-										<a class="menu-link {{ request()->routeIs('leave-policies*') ? 'active' : '' }}" href="{{ route('leave-policies') }}">
-											<span class="menu-bullet">
-												<span class="bullet bullet-dot"></span>
-											</span>
-											<span class="menu-title">Unschedule Time Settings</span>
-										</a>
-									</div>
-								</div>
+
+							<!-- Shift Management Menu -->
+							<div data-kt-menu-trigger="click"
+							     class="menu-item menu-accordion {{ request()->routeIs('shifts.*', 'break-times.*', 'timetables.*', 'shift-list*') ? 'here show' : '' }}">
+
+							    <span class="menu-link">
+							        <span class="menu-icon">
+							            <span class="svg-icon svg-icon-2">
+							                <svg xmlns="http://www.w3.org/2000/svg"
+							                     width="24" height="24"
+							                     viewBox="0 0 24 24"
+							                     fill="none"
+							                     stroke="currentColor"
+							                     stroke-width="2"
+							                     stroke-linecap="round"
+							                     stroke-linejoin="round">
+							                    <circle cx="12" cy="12" r="10"></circle>
+							                    <polyline points="12 6 12 12 16 14"></polyline>
+							                </svg>
+							            </span>
+							        </span>
+
+							        <span class="menu-title">Shift</span>
+							        <span class="menu-arrow"></span>
+							    </span>
+
+							    <div class="menu-sub menu-sub-accordion menu-active-bg">
+
+							        <!-- Shift List -->
+							        <div class="menu-item">
+							            <a class="menu-link {{ request()->routeIs('shifts.*', 'shift-list*') ? 'active' : '' }}"
+							               href="{{ route('shifts.index') }}">
+							                <span class="menu-bullet">
+							                    <span class="bullet bullet-dot"></span>
+							                </span>
+							                <span class="menu-title">Shift List</span>
+							            </a>
+							        </div>
+
+							        <!-- Break Time -->
+							        <div class="menu-item">
+							            <a class="menu-link {{ request()->routeIs('break-times.*') ? 'active' : '' }}"
+							               href="{{ route('break-times.index') }}">
+							                <span class="menu-bullet">
+							                    <span class="bullet bullet-dot"></span>
+							                </span>
+							                <span class="menu-title">Break Time</span>
+							            </a>
+							        </div>
+
+							        <!-- Timetable -->
+							        <div class="menu-item">
+							            <a class="menu-link {{ request()->routeIs('timetables.*') ? 'active' : '' }}"
+							               href="{{ route('timetables.index') }}">
+							                <span class="menu-bullet">
+							                    <span class="bullet bullet-dot"></span>
+							                </span>
+							                <span class="menu-title">Timetable</span>
+							            </a>
+							        </div>
+
+							    </div>
 							</div>
+
+
+
+
+
+
+
 
 							@if(!$hasPerformanceMenu)
 			<div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('review-cycles-*', 'employee-reviews-*', 'employee-goals-*', 'goal-types-*', 'indicator-categories-*', 'indicators-*') ? 'here show' : '' }}">
@@ -779,24 +784,7 @@
 														<span class="menu-title">App Settings</span>
 														<span class="menu-arrow"></span>
 													</span>
-													<div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown menu-active-bg py-lg-4 w-lg-225px">
-														<div class="menu-item">
-															<a class="menu-link py-3" href="{{ route('country-list') }}">
-																<span class="menu-bullet">
-																	<span class="bullet bullet-dot"></span>
-																</span>
-																<span class="menu-title">Country</span>
-															</a>
-														</div>
-														<div class="menu-item">
-															<a class="menu-link py-3" href="{{ route('currency-list') }}">
-																<span class="menu-bullet">
-																	<span class="bullet bullet-dot"></span>
-																</span>
-																<span class="menu-title">Currency</span>
-															</a>
-														</div>
-													</div>
+													
 												</div>
 												<!-- end user management -->
 											</div>
