@@ -36,7 +36,7 @@ class Timetable extends Model
         'unscheduled_settings',
     ];
 
-    protected function casts(): array
+    /*protected function casts(): array
     {
         return [
             'work_day' => 'float',
@@ -47,7 +47,19 @@ class Timetable extends Model
             'overtime_rules' => 'array',
             'unscheduled_settings' => 'array',
         ];
-    }
+    }*/
+
+    protected $casts = [
+        'max_ot_enabled'       => 'boolean',
+        'overtime_enabled'     => 'boolean',
+        'clock_in_required'    => 'boolean',
+        'clock_out_required'   => 'boolean',
+        'allow_late_in'        => 'boolean',
+        'allow_early_out'      => 'boolean',
+
+        'overtime_rules'       => 'array',
+        'unscheduled_settings' => 'array',
+    ];
 
     public function breakTimes(): BelongsToMany
     {

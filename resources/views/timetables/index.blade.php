@@ -141,13 +141,13 @@
                                name="check_in"
                                class="form-control time-24"
                                placeholder="HH:mm:ss"
-                               value="09:00:00"
+                               value=""
                                autocomplete="off">
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="tt-field">
                             <label>Check-Out *</label>
-                            <input type="time" name="check_out" class="form-control" required>
+                            <input placeholder="HH:mm:ss" type="text" name="check_out" class="form-control" required>
                             <div class="invalid-feedback"></div>
                         </div>
 
@@ -168,7 +168,7 @@
                         <div class="tt-field">
                             <label>Check-Out Start Time *</label>
                             <div class="input-group">
-                                <input type="time" name="check_out_start_time"
+                                <input placeholder="HH:mm:ss" type="text" name="check_out_start_time"
                                     class="form-control" required>
                                 <span class="input-group-text">Cross</span>
                                 <select name="check_out_start_days" class="form-select">
@@ -183,7 +183,7 @@
                         <div class="tt-field">
                             <label>Check-In End Time *</label>
                             <div class="input-group">
-                                <input type="time" name="check_in_end_time"
+                                <input placeholder="HH:mm:ss" type="text" name="check_in_end_time"
                                     class="form-control" required>
                                 <span class="input-group-text">Cross</span>
                                 <select name="check_in_end_days" class="form-select">
@@ -197,7 +197,7 @@
                         <div class="tt-field">
                             <label>Check-Out End Time *</label>
                             <div class="input-group">
-                                <input type="time" name="check_out_end_time"
+                                <input placeholder="HH:mm:ss" type="text" name="check_out_end_time"
                                     class="form-control" required>
                                 <span class="input-group-text">Cross</span>
                                 <select name="check_out_end_days" class="form-select">
@@ -218,11 +218,7 @@
                             </div>
                             <div class="invalid-feedback"></div>
                         </div>
-                        <div class="tt-field">
-                            <label>Color Settings</label>
-                            <input type="color" name="color" class="form-control form-control-color"
-                                value="#78bd43">
-                        </div>
+                        
                     </div>
                     <p class="small text-muted mt-3">
                         Notice: Cross-day settings are calculated relative to the timetable day.
@@ -237,27 +233,27 @@
                         <table class="table table-bordered align-middle">
                             <thead>
                             <tr>
-                                <th>Select</th>
-                                <th>Break Name</th>
-                                <th>Start Time</th>
-                                <th>End Time</th>
-                                <th>Duration</th>
-                                <th>Calculation Type</th>
+                                <td>Select</td>
+                                <td>Break Name</td>
+                                <td>Start Time</td>
+                                <td>End Time</td>
+                                <td>Duration</td>
+                                <td>Calculation Type</td>
                             </tr>
                             </thead>
                             <tbody>
                             @forelse($breakTimes as $break)
                                 <tr>
-                                    <td>
+                                    <td style="font-size:12px;">
                                         <input type="checkbox" name="break_time_ids[]"
                                             value="{{ $break->id }}"
                                             class="form-check-input">
                                     </td>
-                                    <td>{{ $break->break_name }}</td>
-                                    <td>{{ substr($break->start_time, 0, 5) }}</td>
-                                    <td>{{ substr($break->end_time, 0, 5) }}</td>
-                                    <td>{{ $break->duration_mins }} mins</td>
-                                    <td>{{ $break->calculation_type_label }}</td>
+                                    <td style="font-size:12px;">{{ $break->break_name }}</td>
+                                    <td style="font-size:12px;">{{ substr($break->start_time, 0, 5) }}</td>
+                                    <td style="font-size:12px;">{{ substr($break->end_time, 0, 5) }}</td>
+                                    <td style="font-size:12px;">{{ $break->duration_mins }} mins</td>
+                                    <td style="font-size:12px;">{{ $break->calculation_type_label }}</td>
                                 </tr>
                             @empty
                                 <tr>
@@ -382,7 +378,7 @@
                             <label>Allow Late-In *</label>
                             <div class="input-group">
                                 <input type="number" name="allow_late_in" min="0"
-                                    value="0" class="form-control" required>
+                                    value="0" class="form-control">
                                 <span class="input-group-text">Minutes</span>
                             </div>
                         </div>
@@ -403,7 +399,7 @@
                         </div>
                         <div class="tt-field">
                             <label>Day Change Time *</label>
-                            <input type="time" name="day_change_time"
+                            <input placeholder="HH:mm:ss" type="text" name="day_change_time"
                                 value="00:00" class="form-control" required>
                         </div>
                     </div>
