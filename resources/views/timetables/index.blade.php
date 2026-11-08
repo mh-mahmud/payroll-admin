@@ -1,5 +1,8 @@
 @extends('layouts.master')
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -120,11 +123,11 @@
             </div>
 
             <div class="tt-tabs" role="tablist">
-                <button type="button" class="tt-tab active" data-tab="basic">Basic Settings</button>
-                <button type="button" class="tt-tab" data-tab="breaks">BreakTime Settings</button>
-                <button type="button" class="tt-tab" data-tab="unscheduled">Unscheduled Time Settings</button>
-                <button type="button" class="tt-tab" data-tab="overtime">Overtime Rule</button>
-                <button type="button" class="tt-tab" data-tab="rules">Rule Settings</button>
+                <button type="button" class="tt-tab active" data-tab="basic"><b>Basic Settings</b></button>
+                <button type="button" class="tt-tab" data-tab="breaks"><b>BreakTime Settings</b></button>
+                <button type="button" class="tt-tab" data-tab="unscheduled"><b>Unscheduled Time Settings</b></button>
+                <button type="button" class="tt-tab" data-tab="overtime"><b>Overtime Rule</b></button>
+                <button type="button" class="tt-tab" data-tab="rules"><b>Rule Settings</b></button>
             </div>
 
             <div class="tt-body">
@@ -133,7 +136,13 @@
                     <div class="tt-grid">
                         <div class="tt-field">
                             <label>Check-In *</label>
-                            <input type="time" name="check_in" class="form-control" required>
+                            <!-- <input type="time" step="1" value="{{ old('check_in', $timetable->check_in ?? '09:00:00') }}" name="check_in" class="form-control" required> -->
+                            <input type="text"
+                               name="check_in"
+                               class="form-control time-24"
+                               placeholder="HH:mm:ss"
+                               value="09:00:00"
+                               autocomplete="off">
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="tt-field">
@@ -145,7 +154,7 @@
                         <div class="tt-field">
                             <label>Check-In Start Time *</label>
                             <div class="input-group">
-                                <input type="time" name="check_in_start_time"
+                                <input type="text" placeholder="HH:mm:ss" name="check_in_start_time"
                                     class="form-control" required>
                                 <span class="input-group-text">Cross</span>
                                 <select name="check_in_start_days" class="form-select">
@@ -282,6 +291,22 @@
                             </select>
                         </div>
                         <div class="tt-field">
+                            <label>Overtime</label>
+                            <select name="overtime_enabled" class="form-select">
+                                <option value="1">Enable</option>
+                                <option value="0">Disable</option>
+                            </select>
+                        </div>
+                        <div class="tt-field">
+                            <label>Min OT Duration *</label>
+                            <div class="input-group">
+                                <input type="number" name="min_ot_duration" min="0"
+                                    max="30" value="30" class="form-control" required>
+                                <span class="input-group-text">Minutes</span>
+                            </div>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="tt-field">
                             <label>Max OT Duration *</label>
                             <div class="input-group">
                                 <input type="number" name="max_ot_duration" min="0"
@@ -290,13 +315,7 @@
                             </div>
                             <div class="invalid-feedback"></div>
                         </div>
-                        <div class="tt-field">
-                            <label>Overtime</label>
-                            <select name="overtime_enabled" class="form-select">
-                                <option value="1">Enable</option>
-                                <option value="0">Disable</option>
-                            </select>
-                        </div>
+                        
                     </div>
 
                     <div class="table-responsive">
@@ -503,6 +522,84 @@
 </style>
 
 <script>
+flatpickr(".time-24", {
+    enableTime: true,
+    noCalendar: false,
+    dateFormat: "H:i:S",
+    time_24hr: true,
+    enableSeconds: true,
+    allowInput: true
+});
+
+const timetableTimeFields = [
+    'check_in',
+    'check_out',
+    'check_in_start_time',
+    'check_in_end_time',
+    'check_out_start_time',
+    'check_out_end_time',
+    'day_change_time'
+];
+
+const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/;
+
+function validateTimeField(input) {
+    const value = input.value.trim();
+
+    let error = input.parentElement.querySelector('.time-validation-error');
+
+    if (!error) {
+        error = document.createElement('div');
+        error.className = 'time-validation-error text-danger mt-1';
+        input.parentElement.appendChild(error);
+    }
+
+    if (value === '') {
+        error.textContent = 'This field is required.';
+        input.classList.add('is-invalid');
+        return false;
+    }
+
+    if (!timeRegex.test(value)) {
+        error.textContent = 'Please enter a valid time in 24-hour format (HH:mm).';
+        input.classList.add('is-invalid');
+        return false;
+    }
+
+    error.textContent = '';
+    input.classList.remove('is-invalid');
+
+    return true;
+}
+
+// Validate when user leaves the field
+timetableTimeFields.forEach(function (name) {
+    const input = document.querySelector(
+        '#timetableForm [name="' + name + '"]'
+    );
+
+    if (!input) return;
+
+    input.addEventListener('blur', function () {
+        validateTimeField(this);
+    });
+
+    // Clear/update error while correcting the value
+    input.addEventListener('input', function () {
+        if (this.classList.contains('is-invalid')) {
+            validateTimeField(this);
+        }
+    });
+});
+
+document.querySelectorAll('#timetableForm input').forEach(function (field) {
+    field.addEventListener('input', function () {
+        if (this.value.trim() !== '') {
+            validateTimeFields();
+        }
+    });
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('timetableForm');
     const overlay = document.getElementById('ttOverlay');
@@ -767,4 +864,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 });
+
 </script>
