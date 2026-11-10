@@ -24,10 +24,10 @@
 
     <div class="card">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead>
+            <table class="table table-row-bordered er-table mb-0">
+                <thead style="background-color: #eee;">
                 <tr>
-                    <th>Name</th>
+                    <th style="padding-left: 20px;">Name</th>
                     <th>Type</th>
                     <th>Check-In</th>
                     <th>Check-Out</th>
