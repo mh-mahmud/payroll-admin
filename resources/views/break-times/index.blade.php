@@ -71,7 +71,7 @@
                         <label for="start_time" class="form-label">
                             Start Time <span class="text-danger">*</span>
                         </label>
-                        <input type="time" id="start_time" name="start_time"
+                        <input type="text" id="start_time" name="start_time"
                                class="form-control">
                         <div class="invalid-feedback"></div>
                     </div>
@@ -80,7 +80,7 @@
                         <label for="end_time" class="form-label">
                             End Time <span class="text-danger">*</span>
                         </label>
-                        <input type="time" id="end_time" name="end_time"
+                        <input type="text" id="end_time" name="end_time"
                                class="form-control">
                         <div class="invalid-feedback"></div>
                     </div>

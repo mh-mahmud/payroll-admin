@@ -45,8 +45,8 @@ class BreakTimeController extends Controller
                 'max:100',
                 Rule::unique('break_times', 'break_name'),
             ],
-            'start_time' => ['required', 'date_format:H:i'],
-            'end_time' => ['required', 'date_format:H:i'],
+            'start_time' => ['required', 'date_format:H:i:s'],
+            'end_time' => ['required', 'date_format:H:i:s'],
             'duration_mins' => ['required', 'integer', 'min:1', 'max:1440'],
             'calculation_type' => [
                 'required',

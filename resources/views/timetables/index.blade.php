@@ -102,7 +102,7 @@
             <button type="button" class="tt-x" id="ttClose">&times;</button>
         </div>
 
-        <form id="timetableForm">
+        <form id="timetableForm" novalidate>
             @csrf
             <input type="hidden" name="type" id="ttType" value="normal">
 
@@ -142,7 +142,7 @@
                                class="form-control time-24"
                                placeholder="HH:mm:ss"
                                value=""
-                               autocomplete="off">
+                               autocomplete="off" required>
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="tt-field">
@@ -400,7 +400,7 @@
                         <div class="tt-field">
                             <label>Day Change Time *</label>
                             <input placeholder="HH:mm:ss" type="text" name="day_change_time"
-                                value="00:00" class="form-control" required>
+                                value="00:00:00" class="form-control" required>
                         </div>
                     </div>
                 </section>
@@ -416,118 +416,111 @@
 @endsection
 
 <style>
-.tt-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 3000;
-    background: rgba(0, 0, 0, .34);
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-.tt-overlay.show { display: flex; }
+    .tt-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 3000;
+        background: rgba(0, 0, 0, .34);
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .tt-overlay.show { display: flex; }
 
-.tt-modal {
-    width: min(100%, 900px);
-    max-height: 90vh;
-    background: #fff;
-    border-radius: 5px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 12px 35px rgba(0,0,0,.18);
-}
-.tt-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    border-bottom: 1px solid #e5e7eb;
-}
-.tt-header h5 { margin: 0; font-size: 17px; }
-.tt-x {
-    border: 0;
-    background: none;
-    font-size: 27px;
-    color: #64748b;
-}
-.tt-top-fields {
-    padding: 16px 20px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-.tt-field label {
-    display: block;
-    font-size: 12px;
-    color: #475569;
-    margin-bottom: 6px;
-}
-.tt-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0;
-    padding: 0 12px;
-    border-bottom: 1px solid #dee2e6;
-}
-.tt-tab {
-    border: 1px solid transparent;
-    background: transparent;
-    padding: 11px 12px;
-    font-size: 13px;
-    color: #475569;
-}
-.tt-tab.active {
-    border-color: #dee2e6 #dee2e6 #fff;
-    border-radius: 4px 4px 0 0;
-    margin-bottom: -1px;
-    color: #111827;
-    background: white;
-}
-.tt-body {
-    padding: 22px;
-    overflow-y: auto;
-    min-height: 270px;
-}
-.tt-panel { display: none; }
-.tt-panel.active { display: block; }
-.tt-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px 28px;
-}
-.tt-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 15px 20px;
-    border-top: 1px solid #e5e7eb;
-}
-.tt-field .form-control,
-.tt-field .form-select {
-    font-size: 13px;
-}
-.tt-field .invalid-feedback { font-size: 12px; }
-@media(max-width: 700px) {
-    .tt-overlay { padding: 8px; }
-    .tt-top-fields, .tt-grid { grid-template-columns: 1fr; }
-    .tt-tabs { padding: 0 5px; }
-    .tt-tab { padding: 9px 7px; font-size: 11px; }
-    .tt-body { padding: 15px; }
-}
+    .tt-modal {
+        width: min(100%, 900px);
+        max-height: 90vh;
+        background: #fff;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 12px 35px rgba(0,0,0,.18);
+    }
+    .tt-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .tt-header h5 { margin: 0; font-size: 17px; }
+    .tt-x {
+        border: 0;
+        background: none;
+        font-size: 27px;
+        color: #64748b;
+    }
+    .tt-top-fields {
+        padding: 16px 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    .tt-field label {
+        display: block;
+        font-size: 12px;
+        color: #475569;
+        margin-bottom: 6px;
+    }
+    .tt-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0;
+        padding: 0 12px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .tt-tab {
+        border: 1px solid transparent;
+        background: transparent;
+        padding: 11px 12px;
+        font-size: 13px;
+        color: #475569;
+    }
+    .tt-tab.active {
+        border-color: #dee2e6 #dee2e6 #fff;
+        border-radius: 4px 4px 0 0;
+        margin-bottom: -1px;
+        color: #111827;
+        background: white;
+    }
+    .tt-body {
+        padding: 22px;
+        overflow-y: auto;
+        min-height: 270px;
+    }
+    .tt-panel { display: none; }
+    .tt-panel.active { display: block; }
+    .tt-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 28px;
+    }
+    .tt-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 15px 20px;
+        border-top: 1px solid #e5e7eb;
+    }
+    .tt-field .form-control,
+    .tt-field .form-select {
+        font-size: 13px;
+    }
+    .tt-field .invalid-feedback { font-size: 12px; }
+    .tt-field .time-validation-error { display: block; }
+    @media(max-width: 700px) {
+        .tt-overlay { padding: 8px; }
+        .tt-top-fields, .tt-grid { grid-template-columns: 1fr; }
+        .tt-tabs { padding: 0 5px; }
+        .tt-tab { padding: 9px 7px; font-size: 11px; }
+        .tt-body { padding: 15px; }
+    }
 </style>
 
 <script>
-flatpickr(".time-24", {
-    enableTime: true,
-    noCalendar: false,
-    dateFormat: "H:i:S",
-    time_24hr: true,
-    enableSeconds: true,
-    allowInput: true
-});
-
-const timetableTimeFields = [
+// Timetable time inputs use strict 24-hour HH:mm:ss format.
+const TIME_FIELD_NAMES = [
     'check_in',
     'check_out',
     'check_in_start_time',
@@ -537,64 +530,122 @@ const timetableTimeFields = [
     'day_change_time'
 ];
 
-const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/;
+const TIME_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/;
 
-function validateTimeField(input) {
-    const value = input.value.trim();
+function normalizeTimeValue(value) {
+    if (value === null || value === undefined || value === '') return '';
+    const time = String(value).trim();
+    if (/^\d{2}:\d{2}$/.test(time)) return time + ':00';
+    return time;
+}
 
-    let error = input.parentElement.querySelector('.time-validation-error');
+// Formats numeric input as HH:mm:ss, inserting each colon automatically.
+function formatTimeInput(input) {
+    const digits = input.value.replace(/\D/g, '').slice(0, 6);
+    let formatted = '';
+
+    if (digits.length > 0) formatted = digits.slice(0, 2);
+    if (digits.length >= 2) formatted += ':';
+    if (digits.length > 2) formatted += digits.slice(2, 4);
+    if (digits.length >= 4) formatted += ':';
+    if (digits.length > 4) formatted += digits.slice(4, 6);
+
+    input.value = formatted;
+}
+
+function getTimeErrorElement(input) {
+    const field = input.closest('.tt-field') || input.parentElement;
+    let error = field.querySelector('.time-validation-error');
 
     if (!error) {
         error = document.createElement('div');
-        error.className = 'time-validation-error text-danger mt-1';
-        input.parentElement.appendChild(error);
+        error.className = 'invalid-feedback d-block time-validation-error';
+        const anchor = input.closest('.input-group') || input;
+        anchor.insertAdjacentElement('afterend', error);
     }
+
+    return error;
+}
+
+function validateTimeField(input, showRequired = true) {
+    const value = input.value.trim();
+    const error = getTimeErrorElement(input);
 
     if (value === '') {
-        error.textContent = 'This field is required.';
-        input.classList.add('is-invalid');
-        return false;
+        error.textContent = showRequired ? 'This field is required.' : '';
+        input.classList.toggle('is-invalid', showRequired);
+        return !showRequired;
     }
 
-    if (!timeRegex.test(value)) {
-        error.textContent = 'Please enter a valid time in 24-hour format (HH:mm).';
+    if (!TIME_PATTERN.test(value)) {
+        error.textContent = 'Enter a valid 24-hour time (HH:mm:ss), for example 09:30:00.';
         input.classList.add('is-invalid');
         return false;
     }
 
     error.textContent = '';
     input.classList.remove('is-invalid');
-
     return true;
 }
 
-// Validate when user leaves the field
-timetableTimeFields.forEach(function (name) {
-    const input = document.querySelector(
-        '#timetableForm [name="' + name + '"]'
-    );
+function validateAllTimeFields() {
+    let isValid = true;
+    let firstInvalid = null;
 
-    if (!input) return;
+    TIME_FIELD_NAMES.forEach(name => {
+        const input = document.querySelector(`#timetableForm [name="${name}"]`);
+        if (!input) return;
 
-    input.addEventListener('blur', function () {
-        validateTimeField(this);
-    });
-
-    // Clear/update error while correcting the value
-    input.addEventListener('input', function () {
-        if (this.classList.contains('is-invalid')) {
-            validateTimeField(this);
+        if (!validateTimeField(input, true)) {
+            isValid = false;
+            if (!firstInvalid) firstInvalid = input;
         }
     });
-});
 
-document.querySelectorAll('#timetableForm input').forEach(function (field) {
-    field.addEventListener('input', function () {
-        if (this.value.trim() !== '') {
-            validateTimeFields();
+    if (firstInvalid) {
+        const panel = firstInvalid.closest('.tt-panel');
+        if (panel && typeof activateTimetableTab === 'function') {
+            activateTimetableTab(panel.id.replace('panel-', ''));
         }
+        firstInvalid.focus();
+    }
+
+    return isValid;
+}
+
+function initializeTimeInputs() {
+    TIME_FIELD_NAMES.forEach(name => {
+        const input = document.querySelector(`#timetableForm [name="${name}"]`);
+        if (!input) return;
+
+        input.type = 'text';
+        input.placeholder = 'HH:mm:ss';
+        input.maxLength = 8;
+        input.autocomplete = 'off';
+        input.inputMode = 'numeric';
+        input.required = true;
+
+        input.addEventListener('input', () => {
+            formatTimeInput(input);
+            if (input.classList.contains('is-invalid') && input.value.length === 8) {
+                validateTimeField(input, false);
+            }
+        });
+
+        input.addEventListener('blur', () => validateTimeField(input, true));
     });
-});
+}
+
+function activateTimetableTab(tabName) {
+    document.querySelectorAll('.tt-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.tab === tabName);
+    });
+    document.querySelectorAll('.tt-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === `panel-${tabName}`);
+    });
+}
+
+initializeTimeInputs();
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('timetableForm');
@@ -654,22 +705,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Automatically open the tab containing the first invalid field.
             const panel = input.closest('.tt-panel');
-            if (panel) activateTab(panel.id.replace('panel-', ''));
+            if (panel) activateTimetableTab(panel.id.replace('panel-', ''));
         }
     }
 
-    function activateTab(tabName) {
-        document.querySelectorAll('.tt-tab').forEach(tab => {
-            tab.classList.toggle('active', tab.dataset.tab === tabName);
-        });
-
-        document.querySelectorAll('.tt-panel').forEach(panel => {
-            panel.classList.toggle('active', panel.id === `panel-${tabName}`);
-        });
-    }
-
     document.querySelectorAll('.tt-tab').forEach(tab => {
-        tab.addEventListener('click', () => activateTab(tab.dataset.tab));
+        tab.addEventListener('click', () => activateTimetableTab(tab.dataset.tab));
     });
 
     function resetForm(type = 'normal') {
@@ -686,9 +727,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Restore defaults after reset.
         form.elements.work_day.value = '1.0';
         form.elements.max_ot_duration.value = '240';
-        form.elements.day_change_time.value = '00:00';
+        form.elements.day_change_time.value = '00:00:00';
 
-        activateTab('basic');
+        activateTimetableTab('basic');
         confirmBtn.textContent = 'Confirm';
     }
 
@@ -739,6 +780,10 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async event => {
         event.preventDefault();
         clearErrors();
+
+        if (!validateAllTimeFields()) {
+            return;
+        }
 
         confirmBtn.disabled = true;
         confirmBtn.textContent = 'Saving...';
@@ -803,7 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (['id', 'created_at', 'updated_at', 'break_times'].includes(key)) return;
                 if (field.type === 'checkbox') field.checked = Boolean(item[key]);
                 else if (item[key] !== null && item[key] !== undefined) {
-                    field.value = String(item[key]).slice(0, 5);
+                    field.value = TIME_FIELD_NAMES.includes(key) ? normalizeTimeValue(item[key]) : String(item[key]);
                 }
             });
 
@@ -822,7 +867,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 box.checked = selectedIds.includes(box.value);
             });
 
-            activateTab('basic');
+            activateTimetableTab('basic');
             openModal();
         } catch (error) {
             Swal.fire('Error', error.data?.message || 'Unable to load timetable.', 'error');

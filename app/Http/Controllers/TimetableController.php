@@ -38,16 +38,16 @@ class TimetableController extends Controller
             ],
             'type' => ['required', Rule::in(['normal', 'flexible'])],
 
-            'check_in' => ['required', 'date_format:H:i'],
-            'check_in_start_time' => ['required', 'date_format:H:i'],
+            'check_in' => ['required', 'date_format:H:i:s'],
+            'check_in_start_time' => ['required', 'date_format:H:i:s'],
             'check_in_start_days' => ['required', 'integer', 'between:0,7'],
-            'check_in_end_time' => ['required', 'date_format:H:i'],
+            'check_in_end_time' => ['required', 'date_format:H:i:s'],
             'check_in_end_days' => ['required', 'integer', 'between:0,7'],
 
-            'check_out' => ['required', 'date_format:H:i'],
-            'check_out_start_time' => ['required', 'date_format:H:i'],
+            'check_out' => ['required', 'date_format:H:i:s'],
+            'check_out_start_time' => ['required', 'date_format:H:i:s'],
             'check_out_start_days' => ['required', 'integer', 'between:0,7'],
-            'check_out_end_time' => ['required', 'date_format:H:i'],
+            'check_out_end_time' => ['required', 'date_format:H:i:s'],
             'check_out_end_days' => ['required', 'integer', 'between:0,7'],
 
             'work_day' => ['required', 'numeric', 'min:0', 'max:7'],
@@ -83,7 +83,7 @@ class TimetableController extends Controller
             'punch_state_based' => [
                 'required', Rule::in(['yes', 'no']),
             ],
-            'day_change_time' => ['required', 'date_format:H:i'],
+            'day_change_time' => ['required', 'date_format:H:i:s'],
 
             'unscheduled_settings' => ['nullable', 'array'],
         ];
