@@ -62,7 +62,15 @@ class TimetableController extends Controller
             'max_ot_duration' => [
                 'required', 'integer', 'min:0', 'max:1440',
             ],
-            'overtime_enabled' => ['required', 'boolean'],
+            'min_ot_duration' => ['required', 'integer', 'min:0', 'max:30'],
+            'overtime_enabled'  => ['required', 'boolean'],
+
+            // Overtime configuration
+            'min_ot_enabled' => ['required', 'boolean'],
+            'ot_block_size_enabled' => ['required', 'boolean'],
+            'ot_block_size_minutes' => ['required', 'integer', 'min:0', 'max:1440'],
+            'ot_block_grace_enabled' => ['required', 'boolean'],
+            'ot_block_grace_minutes' => ['required', 'integer', 'min:0', 'max:1440'],
 
             'overtime_rules' => ['nullable', 'array', 'max:3'],
             'overtime_rules.*.assign_to' => [
@@ -83,6 +91,13 @@ class TimetableController extends Controller
             'punch_state_based' => [
                 'required', Rule::in(['yes', 'no']),
             ],
+
+            // In/out time control configuration
+            'in_time_control_enabled' => ['required', 'boolean'],
+            'out_time_control_enabled' => ['required', 'boolean'],
+            'in_time_control_minutes' => ['required', 'integer', 'min:0', 'max:1440'],
+            'out_time_control_minutes' => ['required', 'integer', 'min:0', 'max:1440'],
+
             'day_change_time' => ['required', 'date_format:H:i:s'],
 
             'unscheduled_settings' => ['nullable', 'array'],

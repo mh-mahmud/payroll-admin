@@ -1,8 +1,5 @@
 @extends('layouts.master')
-<link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -102,7 +99,7 @@
             <button type="button" class="tt-x" id="ttClose">&times;</button>
         </div>
 
-        <form id="timetableForm" novalidate>
+        <form id="timetableForm" style="overflow: scroll;" novalidate>
             @csrf
             <input type="hidden" name="type" id="ttType" value="normal">
 
@@ -311,6 +308,40 @@
                             </div>
                             <div class="invalid-feedback"></div>
                         </div>
+                        <div class="tt-field">
+                            <label>Min OT</label>
+                            <select name="min_ot_enabled" class="form-select">
+                                <option value="1">Enable</option><option value="0">Disable</option>
+                            </select>
+                        </div>
+                        <div class="tt-field">
+                            <label>OT Block Size</label>
+                            <select name="ot_block_size_enabled" class="form-select">
+                                <option value="1">Enable</option><option value="0">Disable</option>
+                            </select>
+                        </div>
+                        <div class="tt-field">
+                            <label>Block Size</label>
+                            <div class="input-group">
+                                <input type="number" name="ot_block_size_minutes" min="0" max="1440" value="0" class="form-control">
+                                <span class="input-group-text">Minutes</span>
+                            </div>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="tt-field">
+                            <label>OT Block and Grace Time</label>
+                            <select name="ot_block_grace_enabled" class="form-select">
+                                <option value="1">Enable</option><option value="0">Disable</option>
+                            </select>
+                        </div>
+                        <div class="tt-field">
+                            <label>Block and Grace Time</label>
+                            <div class="input-group">
+                                <input type="number" name="ot_block_grace_minutes" min="0" max="1440" value="0" class="form-control">
+                                <span class="input-group-text">Minutes</span>
+                            </div>
+                            <div class="invalid-feedback"></div>
+                        </div>
                         
                     </div>
 
@@ -396,6 +427,34 @@
                                 <option value="no">No</option>
                                 <option value="yes">Yes</option>
                             </select>
+                        </div>
+                        <div class="tt-field">
+                            <label>In Time Control</label>
+                            <select name="in_time_control_enabled" class="form-select">
+                                <option value="1">Enable</option><option value="0">Disable</option>
+                            </select>
+                        </div>
+                        <div class="tt-field">
+                            <label>Out Time Control</label>
+                            <select name="out_time_control_enabled" class="form-select">
+                                <option value="1">Enable</option><option value="0">Disable</option>
+                            </select>
+                        </div>
+                        <div class="tt-field">
+                            <label>In Time Control (Minutes)</label>
+                            <div class="input-group">
+                                <input type="number" name="in_time_control_minutes" min="0" max="1440" value="0" class="form-control">
+                                <span class="input-group-text">Minutes</span>
+                            </div>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="tt-field">
+                            <label>Out Time Control (Minutes)</label>
+                            <div class="input-group">
+                                <input type="number" name="out_time_control_minutes" min="0" max="1440" value="0" class="form-control">
+                                <span class="input-group-text">Minutes</span>
+                            </div>
+                            <div class="invalid-feedback"></div>
                         </div>
                         <div class="tt-field">
                             <label>Day Change Time *</label>
@@ -765,10 +824,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        const data = await response.json();
+        const responseText = await response.text();
+        let data = {};
+
+        try {
+            data = responseText ? JSON.parse(responseText) : {};
+        } catch (parseError) {
+            data = { message: responseText || 'The server returned an invalid response.' };
+        }
 
         if (!response.ok) {
-            const error = new Error(data.message || 'Request failed.');
+            const error = new Error(data.message || `Request failed (${response.status}).`);
             error.status = response.status;
             error.data = data;
             throw error;
@@ -846,9 +912,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 const field = form.elements.namedItem(key);
                 if (!field || field instanceof RadioNodeList) return;
                 if (['id', 'created_at', 'updated_at', 'break_times'].includes(key)) return;
-                if (field.type === 'checkbox') field.checked = Boolean(item[key]);
-                else if (item[key] !== null && item[key] !== undefined) {
-                    field.value = TIME_FIELD_NAMES.includes(key) ? normalizeTimeValue(item[key]) : String(item[key]);
+                if (field.type === 'checkbox') {
+                    field.checked = Boolean(item[key]);
+                } else if (item[key] !== null && item[key] !== undefined) {
+                    // Boolean model casts must map to the select's 1/0 option values.
+                    const isBooleanSelect = field.tagName === 'SELECT'
+                        && [...field.options].some(option => option.value === '1')
+                        && [...field.options].some(option => option.value === '0');
+
+                    if (isBooleanSelect && (typeof item[key] === 'boolean' || item[key] === 0 || item[key] === 1)) {
+                        field.value = item[key] ? '1' : '0';
+                    } else {
+                        field.value = TIME_FIELD_NAMES.includes(key)
+                            ? normalizeTimeValue(item[key])
+                            : String(item[key]);
+                    }
                 }
             });
 
@@ -862,9 +940,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            const selectedIds = (result.break_time_ids || []).map(String);
+            // Prefer the controller's ID list, with a relationship fallback.
+            const selectedBreakIds = result.break_time_ids
+                ?? (item.break_times || []).map(breakTime => breakTime.id);
+            const selectedIds = selectedBreakIds.map(String);
+
             form.querySelectorAll('input[name="break_time_ids[]"]').forEach(box => {
-                box.checked = selectedIds.includes(box.value);
+                box.checked = selectedIds.includes(String(box.value));
             });
 
             activateTimetableTab('basic');
