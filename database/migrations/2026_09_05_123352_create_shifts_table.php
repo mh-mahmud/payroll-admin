@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name'); // Shift Name (e.g. "Summer Roster")
             $table->enum('unit', ['day', 'week', 'month'])->default('day');
             $table->unsignedInteger('cycle')->default(1);
-            $table->boolean('auto_shift')->default(false)->after('cycle');
+            $table->boolean('auto_shift')->default(false);
             $table->json('schedule_data'); // The entire grid saved as JSON
             $table->timestamps();
         });
