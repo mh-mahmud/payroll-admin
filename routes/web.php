@@ -645,17 +645,23 @@ Route::group(['middleware' => ['auth', 'check-permission']], function () {
     ]);*/
 
 	// Shifts routes
-	Route::resource('shifts', ShiftController::class)
-	    ->parameters([
-	        'shifts' => 'shift',
-	    ])
-	    ->only([
-	        'index',
-	        'store',
-	        'show',
-	        'update',
-	        'destroy',
-	    ]);
+	// Route::resource('shifts', ShiftController::class)
+	//     ->parameters([
+	//         'shifts' => 'shift',
+	//     ])
+	//     ->only([
+	//         'index',
+	//         'store',
+	//         'show',
+	//         'update',
+	//         'destroy',
+	//     ]);
+
+	Route::get('/shifts',                 [ShiftController::class, 'index'])->name('shifts.index');
+	Route::post('/shifts',                [ShiftController::class, 'store'])->name('shifts.store');
+	Route::get('/shifts/{shift}',         [ShiftController::class, 'show'])->name('shifts.show');
+	Route::delete('/shifts/{shift}',      [ShiftController::class, 'destroy'])->name('shifts.destroy');
+	Route::get('/timetables/search',      [ShiftController::class, 'searchTimetable'])->name('timetables.search');
 
 
 

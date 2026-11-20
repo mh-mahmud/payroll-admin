@@ -88,4 +88,15 @@ class Timetable extends Model
             'timetable_break_time'
         )->withTimestamps();
     }
+
+    // Helper to format times for the UI (e.g., 08:00:00)
+    public function getFormattedCheckInAttribute()
+    {
+        return date('H:i:s', strtotime($this->check_in));
+    }
+
+    public function getFormattedCheckOutAttribute()
+    {
+        return date('H:i:s', strtotime($this->check_out));
+    }
 }

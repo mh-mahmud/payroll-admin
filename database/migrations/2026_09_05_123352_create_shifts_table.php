@@ -10,31 +10,16 @@ return new class extends Migration
     {
         Schema::create('shifts', function (Blueprint $table) {
             $table->id();
-
-            $table->string('name');
-            $table->text('description')->nullable();
-
-            $table->time('start_time');
-            $table->time('end_time');
-
-            $table->unsignedInteger('break_duration')->default(0);
-
-            $table->time('break_start_time')->nullable();
-            $table->time('break_end_time')->nullable();
-
-            $table->unsignedInteger('grace_period')->default(0);
-
-            $table->boolean('is_night_shift')->default(false);
-
-            $table->enum('status', ['active', 'inactive'])
-                ->default('active');
-
+            $table->string('name'); // Shift Name (e.g. "Summer Roster")
+            $table->enum('unit', ['day', 'week', 'month'])->default('day');
+            $table->unsignedInteger('cycle')->default(1);
+            $table->boolean('auto_shift')->default(false)->after('cycle');
+            $table->json('schedule_data'); // The entire grid saved as JSON
             $table->timestamps();
-
-            $table->index('status');
-            $table->index('is_night_shift');
         });
     }
+
+
 
     public function down(): void
     {
