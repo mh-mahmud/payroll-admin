@@ -16,11 +16,9 @@ class ShiftController extends Controller
         
         // You can adapt your stats here if you want
         $totalShifts = Shift::count();
-        $activeShifts = Shift::where('status', 'active')->count(); // Assuming you kept status, else remove
-        
         $shifts = Shift::latest()->paginate(10);
 
-        return view('shifts.index', compact('timetables', 'shifts', 'totalShifts', 'activeShifts'));
+        return view('shifts.index', compact('timetables', 'shifts', 'totalShifts'));
     }
 
     public function searchTimetable(Request $request)
